@@ -6,10 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/coveooss/terraform-provider-servicenow/servicenow/client"
-	"github.com/coveooss/terraform-provider-servicenow/servicenow/resources"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/stretchr/testify/mock"
+	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
+	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/resources"
 )
 
 type ClientMock struct {

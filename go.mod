@@ -1,4 +1,4 @@
-module github.com/coveooss/terraform-provider-servicenow
+module github.com/tylerhatton/terraform-provider-servicenow
 
 go 1.14
 

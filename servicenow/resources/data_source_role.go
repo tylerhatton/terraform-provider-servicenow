@@ -1,8 +1,8 @@
 package resources
 
 import (
-	"github.com/coveooss/terraform-provider-servicenow/servicenow/client"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
 // DataSourceRole reads the informations about a single Role in ServiceNow.
