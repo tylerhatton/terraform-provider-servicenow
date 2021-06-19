@@ -2,7 +2,7 @@ package resources
 
 import (
 	"github.com/coveooss/terraform-provider-servicenow/servicenow/client"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // DataSourceSystemPropertyCategory reads the informations about a single SystemPropertyCategory in ServiceNow.

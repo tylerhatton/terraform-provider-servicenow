@@ -3,7 +3,7 @@ package servicenow
 import (
 	"github.com/coveooss/terraform-provider-servicenow/servicenow/client"
 	"github.com/coveooss/terraform-provider-servicenow/servicenow/resources"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 // Provider is a Terraform Provider to that manages objects in a ServiceNow instance.

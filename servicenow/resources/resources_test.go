@@ -8,7 +8,7 @@ import (
 
 	"github.com/coveooss/terraform-provider-servicenow/servicenow/client"
 	"github.com/coveooss/terraform-provider-servicenow/servicenow/resources"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/stretchr/testify/mock"
 )
 
