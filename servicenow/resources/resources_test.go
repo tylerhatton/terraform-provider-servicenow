@@ -85,6 +85,7 @@ var resourcesToTest = []*schema.Resource{
 	resources.ResourceScriptedRestApi(),
 	resources.ResourceScriptedRestResource(),
 	resources.ResourceScriptInclude(),
+	resources.ResourceServiceCatalogItem(),
 	resources.ResourceSystemProperty(),
 	resources.ResourceSystemPropertyCategory(),
 	resources.ResourceSystemPropertyRelation(),

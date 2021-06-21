@@ -12,7 +12,7 @@ type ServiceCatalogItem struct {
 	HideAddToCart       bool   `json:"no_cart,string"`
 	HideQuantity        bool   `json:"no_quantity,string"`
 	HideDeliveryTime    bool   `json:"no_delivery_time_v2,string"`
-	HideAddToWishList   bool   `json:"no_wishlist_v2,string"`
+	HideAddToWishlist   bool   `json:"no_wishlist_v2,string"`
 	HideAttachment      bool   `json:"no_attachment_v2,string"`
 	MandatoryAttachment bool   `json:"mandatory_attachment,string"`
 	Active              bool   `json:"active,string"`
