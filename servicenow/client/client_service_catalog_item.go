@@ -9,8 +9,8 @@ type ServiceCatalogItem struct {
 	Name                string `json:"name"`
 	ShortDescription    string `json:"short_description"`
 	Description         string `json:"description"`
-	HideAddToCart       bool   `json:"no_cart,string"`
-	HideQuantity        bool   `json:"no_quantity,string"`
+	HideAddToCart       bool   `json:"no_cart_v2,string"`
+	HideQuantity        bool   `json:"no_quantity_v2,string"`
 	HideDeliveryTime    bool   `json:"no_delivery_time_v2,string"`
 	HideAddToWishlist   bool   `json:"no_wishlist_v2,string"`
 	HideAttachment      bool   `json:"no_attachment_v2,string"`
