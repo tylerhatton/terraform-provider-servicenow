@@ -34,16 +34,92 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			systemPropertyCategoryName: {
+			serviceCatalogVariableName: {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Display name of the category.",
+				Description: "Name of variable that will be referenced in scripts throughout ServiceNow.",
 			},
-			systemPropertyCategoryTitleHTML: {
+			serviceCatalogVariableQuestion: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the variable in catalog item.",
+			},
+			serviceCatalogVariableTooltip: {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
-				Description: "The HTML displayed at the top of the page when configuring properties for this category.",
+				Description: "Tooltip hint of the variable in catalog item.",
+			},
+			serviceCatalogVariableHelpTag: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Help header of the variable in catalog item.",
+			},
+			serviceCatalogVariableHelpText: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Help text for the variable in catalog item.",
+			},
+			serviceCatalogVariableInstructions: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Additional instructions for the variable in catalog item.",
+			},
+			serviceCatalogVariableDefaultValue: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Default value for the variable in catalog item.",
+			},
+			serviceCatalogVariableType: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Type of variable to be used in catalog item.",
+			},
+			serviceCatalogVariableCatalogItem: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The sys id of the catalog item the variable will be assigned to",
+			},
+			serviceCatalogVariableOrder: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The sys id of the catalog item the variable will be assigned to",
+			},
+			serviceCatalogVariableShowHelp: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this property will enabling displaying additional help information with the variable.",
+			},
+			serviceCatalogVariableMandatory: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this property will make completion of the variable mandatory.",
+			},
+			serviceCatalogVariableReadOnly: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this property will make the variable read only.",
+			},
+			serviceCatalogVariableHidden: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this property will hide the variable in the service catalog item.",
+			},
+			serviceCatalogVariableActive: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If set to 'true', this property will enable the variable in the service catalog item.",
 			},
 			commonScope: getScopeSchema(),
 		},
