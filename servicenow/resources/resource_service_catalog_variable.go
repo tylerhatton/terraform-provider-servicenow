@@ -21,7 +21,7 @@ const serviceCatalogVariableReadOnly = "read_only"
 const serviceCatalogVariableHidden = "hidden"
 const serviceCatalogVariableActive = "active"
 
-// ResourceServiceCatalogVariable manages a System Property Category in ServiceNow.
+// ResourceServiceCatalogVariable manages a service catalog variable in ServiceNow.
 func ResourceServiceCatalogVariable() *schema.Resource {
 	return &schema.Resource{
 		Create: createResourceServiceCatalogVariable,
@@ -78,6 +78,42 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Type of variable to be used in catalog item.",
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					warns, errs = validateStringValue(val.(string), key, []string{
+						"Attachment",
+						"Break",
+						"CheckBox",
+						"Container End",
+						"Container Split",
+						"Container Start",
+						"Custom",
+						"Custom with Label",
+						"Date",
+						"Date/Time",
+						"Duration",
+						"Email",
+						"HTML",
+						"IP Address",
+						"Label",
+						"List Collector",
+						"Lookup Multiple Choice",
+						"Lookup Select Box",
+						"Masked",
+						"Multi Line Text",
+						"Multiple Choice",
+						"Numeric Scale",
+						"Reference",
+						"Requested For",
+						"Rich Text Label",
+						"Select Box",
+						"Single Line Text",
+						"UI Page",
+						"URL",
+						"Wide Single Line Text",
+						"Yes/No",
+					})
+					return
+				},
 			},
 			serviceCatalogVariableCatalogItem: {
 				Type:        schema.TypeString,
@@ -128,32 +164,32 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 
 func readResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowClient interface{}) error {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	systemPropertyCategory := &client.SystemPropertyCategory{}
-	if err := snowClient.GetObject(client.EndpointSystemPropertyCategory, data.Id(), systemPropertyCategory); err != nil {
+	serviceCatalogVariable := &client.ServiceCatalogVariable{}
+	if err := snowClient.GetObject(client.EndpointServiceCatalogVariable, data.Id(), serviceCatalogVariable); err != nil {
 		data.SetId("")
 		return err
 	}
 
-	resourceFromSystemPropertyCategory(data, systemPropertyCategory)
+	resourceFromServiceCatalogVariable(data, serviceCatalogVariable)
 
 	return nil
 }
 
 func createResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowClient interface{}) error {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	systemPropertyCategory := resourceToSystemPropertyCategory(data)
-	if err := snowClient.CreateObject(client.EndpointSystemPropertyCategory, systemPropertyCategory); err != nil {
+	serviceCatalogVariable := resourceToServiceCatalogVariable(data)
+	if err := snowClient.CreateObject(client.EndpointServiceCatalogVariable, serviceCatalogVariable); err != nil {
 		return err
 	}
 
-	resourceFromSystemPropertyCategory(data, systemPropertyCategory)
+	resourceFromServiceCatalogVariable(data, serviceCatalogVariable)
 
 	return readResourceServiceCatalogVariable(data, serviceNowClient)
 }
 
 func updateResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowClient interface{}) error {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointSystemPropertyCategory, resourceToSystemPropertyCategory(data)); err != nil {
+	if err := snowClient.UpdateObject(client.EndpointServiceCatalogVariable, resourceToServiceCatalogVariable(data)); err != nil {
 		return err
 	}
 
@@ -162,22 +198,22 @@ func updateResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowC
 
 func deleteResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowClient interface{}) error {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointSystemPropertyCategory, data.Id())
+	return snowClient.DeleteObject(client.EndpointServiceCatalogVariable, data.Id())
 }
 
-func resourceFromSystemPropertyCategory(data *schema.ResourceData, systemPropertyCategory *client.SystemPropertyCategory) {
-	data.SetId(systemPropertyCategory.ID)
-	data.Set(systemPropertyCategoryName, systemPropertyCategory.Name)
-	data.Set(systemPropertyCategoryTitleHTML, systemPropertyCategory.TitleHTML)
-	data.Set(commonScope, systemPropertyCategory.Scope)
+func resourceFromServiceCatalogVariable(data *schema.ResourceData, serviceCatalogVariable *client.ServiceCatalogVariable) {
+	data.SetId(serviceCatalogVariable.ID)
+	data.Set(systemPropertyCategoryName, serviceCatalogVariable.Name)
+	data.Set(systemPropertyCategoryTitleHTML, serviceCatalogVariable.TitleHTML)
+	data.Set(commonScope, serviceCatalogVariable.Scope)
 }
 
-func resourceToSystemPropertyCategory(data *schema.ResourceData) *client.SystemPropertyCategory {
-	systemPropertyCategory := client.SystemPropertyCategory{
+func resourceToServiceCatalogVariable(data *schema.ResourceData) *client.ServiceCatalogVariable {
+	serviceCatalogVariable := client.ServiceCatalogVariable{
 		Name:      data.Get(systemPropertyCategoryName).(string),
 		TitleHTML: data.Get(systemPropertyCategoryTitleHTML).(string),
 	}
-	systemPropertyCategory.ID = data.Id()
-	systemPropertyCategory.Scope = data.Get(commonScope).(string)
-	return &systemPropertyCategory
+	serviceCatalogVariable.ID = data.Id()
+	serviceCatalogVariable.Scope = data.Get(commonScope).(string)
+	return &serviceCatalogVariable
 }
