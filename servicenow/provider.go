@@ -48,6 +48,7 @@ func Provider() *schema.Provider {
 			"servicenow_scripted_rest_resource":     resources.ResourceScriptedRestResource(),
 			"servicenow_script_include":             resources.ResourceScriptInclude(),
 			"servicenow_service_catalog_item":       resources.ResourceServiceCatalogItem(),
+			"servicenow_service_catalog_variable":   resources.ResourceServiceCatalogVariable(),
 			"servicenow_system_property":            resources.ResourceSystemProperty(),
 			"servicenow_system_property_category":   resources.ResourceSystemPropertyCategory(),
 			"servicenow_system_property_relation":   resources.ResourceSystemPropertyRelation(),

@@ -15,6 +15,10 @@ const serviceCatalogVariableDefaultValue = "default_value"
 const serviceCatalogVariableType = "type"
 const serviceCatalogVariableCatalogItem = "catalog_item"
 const serviceCatalogVariableOrder = "order"
+const serviceCatalogVariableListTable = "list_table"
+const serviceCatalogVariableLookupTable = "lookup_table"
+const serviceCatalogVariableLookupValue = "lookup_value"
+const serviceCatalogVariableReference = "reference"
 const serviceCatalogVariableShowHelp = "show_help"
 const serviceCatalogVariableMandatory = "mandatory"
 const serviceCatalogVariableReadOnly = "read_only"
@@ -127,6 +131,30 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 				Default:     "",
 				Description: "The sys id of the catalog item the variable will be assigned to",
 			},
+			serviceCatalogVariableListTable: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The name of the ServiceNow table the catalog item will use to populate its list.",
+			},
+			serviceCatalogVariableLookupTable: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The name of the ServiceNow table the catalog item will use to populate its lookup list.",
+			},
+			serviceCatalogVariableLookupValue: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The name of the table value the catalog item will use to populate its lookup list.",
+			},
+			serviceCatalogVariableReference: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The name of the table the catalog item will use to populate its reference list.",
+			},
 			serviceCatalogVariableShowHelp: {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -202,16 +230,126 @@ func deleteResourceServiceCatalogVariable(data *schema.ResourceData, serviceNowC
 }
 
 func resourceFromServiceCatalogVariable(data *schema.ResourceData, serviceCatalogVariable *client.ServiceCatalogVariable) {
+	var typeString string
+	switch serviceCatalogVariable.Type {
+	case "33":
+		typeString = "Attachment"
+	case "12":
+		typeString = "Break"
+	case "7":
+		typeString = "CheckBox"
+	case "20":
+		typeString = "Container End"
+	case "24":
+		typeString = "Container Split"
+	case "19":
+		typeString = "Container Start"
+	case "14":
+		typeString = "Custom"
+	case "17":
+		typeString = "Custom with Label"
+	case "9":
+		typeString = "Date"
+	case "10":
+		typeString = "Date/Time"
+	case "29":
+		typeString = "Duration"
+	case "26":
+		typeString = "Email"
+	case "23":
+		typeString = "HTML"
+	case "28":
+		typeString = "IP Address"
+	case "11":
+		typeString = "Label"
+	case "21":
+		typeString = "List Collector"
+	case "22":
+		typeString = "Lookup Multiple Choice"
+	case "18":
+		typeString = "Lookup Select Box"
+	case "25":
+		typeString = "Masked"
+	case "2":
+		typeString = "Multi Line Text"
+	case "3":
+		typeString = "Multiple Choice"
+	case "4":
+		typeString = "Numeric Scale"
+	case "8":
+		typeString = "Reference"
+	case "31":
+		typeString = "Requested For"
+	case "32":
+		typeString = "Rich Text Label"
+	case "5":
+		typeString = "Select Box"
+	case "6":
+		typeString = "Single Line Text"
+	case "15":
+		typeString = "UI Page"
+	case "27":
+		typeString = "URL"
+	case "16":
+		typeString = "Wide Single Line Text"
+	case "1":
+		typeString = "Yes/No"
+	}
+
 	data.SetId(serviceCatalogVariable.ID)
-	data.Set(systemPropertyCategoryName, serviceCatalogVariable.Name)
-	data.Set(systemPropertyCategoryTitleHTML, serviceCatalogVariable.TitleHTML)
+	data.Set(serviceCatalogVariableName, serviceCatalogVariable.Name)
+	data.Set(serviceCatalogVariableQuestion, serviceCatalogVariable.Question)
+	data.Set(serviceCatalogVariableTooltip, serviceCatalogVariable.Tooltip)
+	data.Set(serviceCatalogVariableHelpTag, serviceCatalogVariable.HelpTag)
+	data.Set(serviceCatalogVariableHelpText, serviceCatalogVariable.HelpText)
+	data.Set(serviceCatalogVariableInstructions, serviceCatalogVariable.Instructions)
+	data.Set(serviceCatalogVariableDefaultValue, serviceCatalogVariable.DefaultValue)
+	data.Set(serviceCatalogVariableType, typeString)
+	data.Set(serviceCatalogVariableCatalogItem, serviceCatalogVariable.CatalogItem)
+	data.Set(serviceCatalogVariableOrder, serviceCatalogVariable.Order)
+	data.Set(serviceCatalogVariableListTable, serviceCatalogVariable.ListTable)
+	data.Set(serviceCatalogVariableLookupTable, serviceCatalogVariable.LookupTable)
+	data.Set(serviceCatalogVariableLookupTable, serviceCatalogVariable.LookupValue)
+	data.Set(serviceCatalogVariableReference, serviceCatalogVariable.Reference)
+	data.Set(serviceCatalogVariableShowHelp, serviceCatalogVariable.ShowHelp)
+	data.Set(serviceCatalogVariableMandatory, serviceCatalogVariable.Mandatory)
+	data.Set(serviceCatalogVariableReadOnly, serviceCatalogVariable.ReadOnly)
+	data.Set(serviceCatalogVariableHidden, serviceCatalogVariable.Hidden)
+	data.Set(serviceCatalogVariableActive, serviceCatalogVariable.Active)
 	data.Set(commonScope, serviceCatalogVariable.Scope)
 }
 
 func resourceToServiceCatalogVariable(data *schema.ResourceData) *client.ServiceCatalogVariable {
+	var typeInt string
+	switch data.Get(serviceCatalogVariableType).(string) {
+	case "mobile":
+		typeInt = "1"
+	case "desktop":
+		typeInt = "0"
+	default:
+		typeInt = "10"
+	}
+
 	serviceCatalogVariable := client.ServiceCatalogVariable{
-		Name:      data.Get(systemPropertyCategoryName).(string),
-		TitleHTML: data.Get(systemPropertyCategoryTitleHTML).(string),
+		Name:         data.Get(serviceCatalogVariableName).(string),
+		Question:     data.Get(serviceCatalogVariableQuestion).(string),
+		Tooltip:      data.Get(serviceCatalogVariableTooltip).(string),
+		HelpTag:      data.Get(serviceCatalogVariableHelpTag).(string),
+		HelpText:     data.Get(serviceCatalogVariableHelpText).(string),
+		Instructions: data.Get(serviceCatalogVariableInstructions).(string),
+		DefaultValue: data.Get(serviceCatalogVariableDefaultValue).(string),
+		Type:         typeInt,
+		CatalogItem:  data.Get(serviceCatalogVariableCatalogItem).(string),
+		Order:        data.Get(serviceCatalogVariableOrder).(string),
+		ListTable:    data.Get(serviceCatalogVariableListTable).(string),
+		LookupTable:  data.Get(serviceCatalogVariableLookupTable).(string),
+		LookupValue:  data.Get(serviceCatalogVariableLookupValue).(string),
+		Reference:    data.Get(serviceCatalogVariableReference).(string),
+		ShowHelp:     data.Get(serviceCatalogVariableOrder).(bool),
+		Mandatory:    data.Get(serviceCatalogVariableOrder).(bool),
+		ReadOnly:     data.Get(serviceCatalogVariableReadOnly).(bool),
+		Hidden:       data.Get(serviceCatalogVariableHidden).(bool),
+		Active:       data.Get(serviceCatalogVariableActive).(bool),
 	}
 	serviceCatalogVariable.ID = data.Id()
 	serviceCatalogVariable.Scope = data.Get(commonScope).(string)

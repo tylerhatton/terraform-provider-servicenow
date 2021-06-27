@@ -16,6 +16,10 @@ type ServiceCatalogVariable struct {
 	Type         string `json:"type"`
 	CatalogItem  string `json:"cat_item"`
 	Order        string `json:"order"`
+	ListTable    string `json:"list_table"`
+	LookupTable  string `json:"lookup_table"`
+	LookupValue  string `json:"lookup_value"`
+	Reference    string `json:"reference"`
 	ShowHelp     bool   `json:"show_help,string"`
 	Mandatory    bool   `json:"mandatory,string"`
 	ReadOnly     bool   `json:"read_only,string"`
