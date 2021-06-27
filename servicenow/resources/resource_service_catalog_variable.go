@@ -45,7 +45,7 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 			},
 			serviceCatalogVariableQuestion: {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "Display name of the variable in catalog item.",
 			},
 			serviceCatalogVariableTooltip: {
@@ -57,7 +57,7 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 			serviceCatalogVariableHelpTag: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
+				Default:     "More information",
 				Description: "Help header of the variable in catalog item.",
 			},
 			serviceCatalogVariableHelpText: {
@@ -401,8 +401,8 @@ func resourceToServiceCatalogVariable(data *schema.ResourceData) *client.Service
 		LookupTable:  data.Get(serviceCatalogVariableLookupTable).(string),
 		LookupValue:  data.Get(serviceCatalogVariableLookupValue).(string),
 		Reference:    data.Get(serviceCatalogVariableReference).(string),
-		ShowHelp:     data.Get(serviceCatalogVariableOrder).(bool),
-		Mandatory:    data.Get(serviceCatalogVariableOrder).(bool),
+		ShowHelp:     data.Get(serviceCatalogVariableShowHelp).(bool),
+		Mandatory:    data.Get(serviceCatalogVariableMandatory).(bool),
 		ReadOnly:     data.Get(serviceCatalogVariableReadOnly).(bool),
 		Hidden:       data.Get(serviceCatalogVariableHidden).(bool),
 		Active:       data.Get(serviceCatalogVariableActive).(bool),
