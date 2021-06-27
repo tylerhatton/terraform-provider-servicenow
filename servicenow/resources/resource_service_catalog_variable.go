@@ -322,12 +322,68 @@ func resourceFromServiceCatalogVariable(data *schema.ResourceData, serviceCatalo
 func resourceToServiceCatalogVariable(data *schema.ResourceData) *client.ServiceCatalogVariable {
 	var typeInt string
 	switch data.Get(serviceCatalogVariableType).(string) {
-	case "mobile":
-		typeInt = "1"
-	case "desktop":
-		typeInt = "0"
-	default:
+	case "Attachment":
+		typeInt = "33"
+	case "Break":
+		typeInt = "12"
+	case "CheckBox":
+		typeInt = "7"
+	case "Container End":
+		typeInt = "20"
+	case "Container Split":
+		typeInt = "24"
+	case "Container Start":
+		typeInt = "19"
+	case "Custom":
+		typeInt = "14"
+	case "Custom with Label":
+		typeInt = "17"
+	case "Date":
+		typeInt = "9"
+	case "Date/Time":
 		typeInt = "10"
+	case "Duration":
+		typeInt = "29"
+	case "Email":
+		typeInt = "26"
+	case "HTML":
+		typeInt = "23"
+	case "IP Address":
+		typeInt = "28"
+	case "Label":
+		typeInt = "11"
+	case "List Collector":
+		typeInt = "21"
+	case "Lookup Multiple Choice":
+		typeInt = "22"
+	case "Lookup Select Box":
+		typeInt = "18"
+	case "Masked":
+		typeInt = "25"
+	case "Multi Line Text":
+		typeInt = "2"
+	case "Multiple Choice":
+		typeInt = "3"
+	case "Numeric Scale":
+		typeInt = "4"
+	case "Reference":
+		typeInt = "8"
+	case "Requested For":
+		typeInt = "31"
+	case "Rich Text Label":
+		typeInt = "32"
+	case "Select Box":
+		typeInt = "5"
+	case "Single Line Text":
+		typeInt = "6"
+	case "UI Page":
+		typeInt = "15"
+	case "URL":
+		typeInt = "27"
+	case "Wide Single Line Text":
+		typeInt = "16"
+	case "Yes/No":
+		typeInt = "1"
 	}
 
 	serviceCatalogVariable := client.ServiceCatalogVariable{
