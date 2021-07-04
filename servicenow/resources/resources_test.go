@@ -77,6 +77,7 @@ var resourcesToTest = []*schema.Resource{
 	resources.ResourceJsInclude(),
 	resources.ResourceJsIncludeRelation(),
 	resources.ResourceOAuthEntity(),
+	resources.ResourceQuestionChoice(),
 	resources.ResourceRole(),
 	resources.ResourceRestMessage(),
 	resources.ResourceRestMessageHeader(),
