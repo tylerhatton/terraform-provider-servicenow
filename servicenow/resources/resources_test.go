@@ -87,6 +87,7 @@ var resourcesToTest = []*schema.Resource{
 	resources.ResourceScriptedRestResource(),
 	resources.ResourceScriptInclude(),
 	resources.ResourceServiceCatalog(),
+	resources.ResourceServiceCatalogCategory(),
 	resources.ResourceServiceCatalogItem(),
 	resources.ResourceServiceCatalogVariable(),
 	resources.ResourceSystemProperty(),
@@ -107,6 +108,7 @@ var dataSourcesToTest = []*schema.Resource{
 	resources.DataSourceDBTable(),
 	resources.DataSourceRole(),
 	resources.DataSourceServiceCatalog(),
+	resources.DataSourceServiceCatalogCategory(),
 	resources.DataSourceSystemProperty(),
 	resources.DataSourceSystemPropertyCategory(),
 }

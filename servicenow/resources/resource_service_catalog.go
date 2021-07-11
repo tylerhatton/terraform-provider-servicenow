@@ -32,7 +32,7 @@ func ResourceServiceCatalog() *schema.Resource {
 			serviceCatalogTitle: {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Title of the service satalog.",
+				Description: "Title of the service catalog.",
 			},
 			serviceCatalogManager: {
 				Type:        schema.TypeString,
