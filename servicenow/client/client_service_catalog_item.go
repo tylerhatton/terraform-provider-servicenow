@@ -7,6 +7,8 @@ const EndpointServiceCatalogItem = "sc_cat_item.do"
 type ServiceCatalogItem struct {
 	BaseResult
 	Name                string `json:"name"`
+	ServiceCatalogs     string `json:"sc_catalogs"`
+	Category            string `json:"category"`
 	ShortDescription    string `json:"short_description"`
 	Description         string `json:"description"`
 	HideAddToCart       bool   `json:"no_cart_v2,string"`
