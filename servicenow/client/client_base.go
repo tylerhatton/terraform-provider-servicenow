@@ -20,6 +20,7 @@ type Client struct {
 type ServiceNowClient interface {
 	GetObject(string, string, Record) error
 	GetObjectByName(string, string, Record) error
+	GetObjectByTitle(string, string, Record) error
 	CreateObject(string, Record) error
 	UpdateObject(string, Record) error
 	DeleteObject(string, string) error
@@ -107,6 +108,15 @@ func (client *Client) GetObject(endpoint string, id string, responseObjectOut Re
 // GetObjectByName retrieves an object via its name attribute.
 func (client *Client) GetObjectByName(endpoint string, name string, responseObjectOut Record) error {
 	jsonResponse, err := client.requestJSON("GET", endpoint+"?JSONv2&sysparm_query=name="+url.QueryEscape(name), nil)
+	if err != nil {
+		return err
+	}
+	return parseResponseToRecord(jsonResponse, responseObjectOut)
+}
+
+// GetObjectByTitle retrieves an object via its title attribute.
+func (client *Client) GetObjectByTitle(endpoint string, title string, responseObjectOut Record) error {
+	jsonResponse, err := client.requestJSON("GET", endpoint+"?JSONv2&sysparm_query=title="+url.QueryEscape(title), nil)
 	if err != nil {
 		return err
 	}

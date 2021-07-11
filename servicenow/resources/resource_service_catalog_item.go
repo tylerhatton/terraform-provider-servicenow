@@ -6,6 +6,8 @@ import (
 )
 
 const serviceCatalogItemName = "name"
+const serviceCatalogItemServiceCatalogs = "service_catalogs"
+const serviceCatalogItemCategory = "category"
 const serviceCatalogItemShortDescription = "short_description"
 const serviceCatalogItemDescription = "description"
 const serviceCatalogItemHideAddToCart = "no_cart"
@@ -33,6 +35,18 @@ func ResourceServiceCatalogItem() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Display name of service catalog item.",
+			},
+			serviceCatalogItemServiceCatalogs: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Comma-seperated list of service catalogs the service catalog item is assigned to.",
+			},
+			serviceCatalogItemCategory: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Service catalog category the service catalog item is assigned to.",
 			},
 			serviceCatalogItemShortDescription: {
 				Type:        schema.TypeString,
@@ -135,6 +149,8 @@ func deleteResourceServiceCatalogItem(data *schema.ResourceData, serviceNowClien
 func resourceFromServiceCatalogItem(data *schema.ResourceData, serviceCatalogItem *client.ServiceCatalogItem) {
 	data.SetId(serviceCatalogItem.ID)
 	data.Set(serviceCatalogItemName, serviceCatalogItem.Name)
+	data.Set(serviceCatalogItemServiceCatalogs, serviceCatalogItem.ServiceCatalogs)
+	data.Set(serviceCatalogItemCategory, serviceCatalogItem.Category)
 	data.Set(serviceCatalogItemShortDescription, serviceCatalogItem.ShortDescription)
 	data.Set(serviceCatalogItemDescription, serviceCatalogItem.Description)
 	data.Set(serviceCatalogItemHideAddToCart, serviceCatalogItem.HideAddToCart)
@@ -144,11 +160,14 @@ func resourceFromServiceCatalogItem(data *schema.ResourceData, serviceCatalogIte
 	data.Set(serviceCatalogItemHideAttachment, serviceCatalogItem.HideAttachment)
 	data.Set(serviceCatalogItemMandatoryAttachment, serviceCatalogItem.MandatoryAttachment)
 	data.Set(serviceCatalogItemActive, serviceCatalogItem.Active)
+	data.Set(commonScope, serviceCatalogItem.Scope)
 }
 
 func resourceToServiceCatalogItem(data *schema.ResourceData) *client.ServiceCatalogItem {
 	serviceCatalogItem := client.ServiceCatalogItem{
 		Name:                data.Get(serviceCatalogItemName).(string),
+		ServiceCatalogs:     data.Get(serviceCatalogItemServiceCatalogs).(string),
+		Category:            data.Get(serviceCatalogItemCategory).(string),
 		ShortDescription:    data.Get(serviceCatalogItemShortDescription).(string),
 		Description:         data.Get(serviceCatalogItemDescription).(string),
 		HideAddToCart:       data.Get(serviceCatalogItemHideAddToCart).(bool),
