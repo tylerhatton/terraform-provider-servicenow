@@ -69,6 +69,7 @@ var resourcesToTest = []*schema.Resource{
 	resources.ResourceApplication(),
 	resources.ResourceApplicationMenu(),
 	resources.ResourceApplicationModule(),
+	resources.ResourceBasicAuthCredential(),
 	resources.ResourceContentCSS(),
 	resources.ResourceCSSInclude(),
 	resources.ResourceCSSIncludeRelation(),
