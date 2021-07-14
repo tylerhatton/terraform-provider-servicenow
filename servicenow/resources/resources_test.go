@@ -66,6 +66,7 @@ func (m *RecordMock) GetError() string {
 }
 
 var resourcesToTest = []*schema.Resource{
+	resources.ResourceAlias(),
 	resources.ResourceApplication(),
 	resources.ResourceApplicationMenu(),
 	resources.ResourceApplicationModule(),
