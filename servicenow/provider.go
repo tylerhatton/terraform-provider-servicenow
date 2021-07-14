@@ -28,9 +28,11 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
+			"servicenow_alias":                      resources.ResourceAlias(),
 			"servicenow_application":                resources.ResourceApplication(),
 			"servicenow_application_menu":           resources.ResourceApplicationMenu(),
 			"servicenow_application_module":         resources.ResourceApplicationModule(),
+			"servicenow_basic_auth_credential":      resources.ResourceBasicAuthCredential(),
 			"servicenow_content_css":                resources.ResourceContentCSS(),
 			"servicenow_css_include":                resources.ResourceCSSInclude(),
 			"servicenow_css_include_relation":       resources.ResourceCSSIncludeRelation(),
