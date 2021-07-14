@@ -53,7 +53,6 @@ func ResourceBasicAuthCredential() *schema.Resource {
 				Required:    true,
 				Description: "Sys ID for credential alias the credential is assigned to.",
 			},
-			commonScope: getScopeSchema(),
 		},
 	}
 }
@@ -104,7 +103,6 @@ func resourceFromBasicAuthCredential(data *schema.ResourceData, basicAuthCredent
 	data.Set(basicAuthCredentialUserName, basicAuthCredential.UserName)
 	data.Set(basicAuthCredentialPassword, basicAuthCredential.Password)
 	data.Set(basicAuthCredentialCredentialAlias, basicAuthCredential.CredentialAlias)
-	data.Set(commonScope, basicAuthCredential.Scope)
 }
 
 func resourceToBasicAuthCredential(data *schema.ResourceData) *client.BasicAuthCredential {
@@ -116,6 +114,5 @@ func resourceToBasicAuthCredential(data *schema.ResourceData) *client.BasicAuthC
 		CredentialAlias: data.Get(basicAuthCredentialCredentialAlias).(string),
 	}
 	basicAuthCredential.ID = data.Id()
-	basicAuthCredential.Scope = data.Get(commonScope).(string)
 	return &basicAuthCredential
 }
