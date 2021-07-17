@@ -19,6 +19,7 @@ const serviceCatalogVariableListTable = "list_table"
 const serviceCatalogVariableLookupTable = "lookup_table"
 const serviceCatalogVariableLookupValue = "lookup_value"
 const serviceCatalogVariableReference = "reference"
+const serviceCatalogVariableReferenceQualifier = "reference_qualifier"
 const serviceCatalogVariableShowHelp = "show_help"
 const serviceCatalogVariableMandatory = "mandatory"
 const serviceCatalogVariableReadOnly = "read_only"
@@ -154,6 +155,12 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 				Optional:    true,
 				Default:     "",
 				Description: "The name of the table the catalog item will use to populate its reference list.",
+			},
+			serviceCatalogVariableReferenceQualifier: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The table filter applied to the reference lookup.",
 			},
 			serviceCatalogVariableShowHelp: {
 				Type:        schema.TypeBool,
@@ -311,6 +318,7 @@ func resourceFromServiceCatalogVariable(data *schema.ResourceData, serviceCatalo
 	data.Set(serviceCatalogVariableLookupTable, serviceCatalogVariable.LookupTable)
 	data.Set(serviceCatalogVariableLookupTable, serviceCatalogVariable.LookupValue)
 	data.Set(serviceCatalogVariableReference, serviceCatalogVariable.Reference)
+	data.Set(serviceCatalogVariableReferenceQualifier, serviceCatalogVariable.ReferenceQualifier)
 	data.Set(serviceCatalogVariableShowHelp, serviceCatalogVariable.ShowHelp)
 	data.Set(serviceCatalogVariableMandatory, serviceCatalogVariable.Mandatory)
 	data.Set(serviceCatalogVariableReadOnly, serviceCatalogVariable.ReadOnly)
@@ -387,25 +395,26 @@ func resourceToServiceCatalogVariable(data *schema.ResourceData) *client.Service
 	}
 
 	serviceCatalogVariable := client.ServiceCatalogVariable{
-		Name:         data.Get(serviceCatalogVariableName).(string),
-		Question:     data.Get(serviceCatalogVariableQuestion).(string),
-		Tooltip:      data.Get(serviceCatalogVariableTooltip).(string),
-		HelpTag:      data.Get(serviceCatalogVariableHelpTag).(string),
-		HelpText:     data.Get(serviceCatalogVariableHelpText).(string),
-		Instructions: data.Get(serviceCatalogVariableInstructions).(string),
-		DefaultValue: data.Get(serviceCatalogVariableDefaultValue).(string),
-		Type:         typeInt,
-		CatalogItem:  data.Get(serviceCatalogVariableCatalogItem).(string),
-		Order:        data.Get(serviceCatalogVariableOrder).(string),
-		ListTable:    data.Get(serviceCatalogVariableListTable).(string),
-		LookupTable:  data.Get(serviceCatalogVariableLookupTable).(string),
-		LookupValue:  data.Get(serviceCatalogVariableLookupValue).(string),
-		Reference:    data.Get(serviceCatalogVariableReference).(string),
-		ShowHelp:     data.Get(serviceCatalogVariableShowHelp).(bool),
-		Mandatory:    data.Get(serviceCatalogVariableMandatory).(bool),
-		ReadOnly:     data.Get(serviceCatalogVariableReadOnly).(bool),
-		Hidden:       data.Get(serviceCatalogVariableHidden).(bool),
-		Active:       data.Get(serviceCatalogVariableActive).(bool),
+		Name:               data.Get(serviceCatalogVariableName).(string),
+		Question:           data.Get(serviceCatalogVariableQuestion).(string),
+		Tooltip:            data.Get(serviceCatalogVariableTooltip).(string),
+		HelpTag:            data.Get(serviceCatalogVariableHelpTag).(string),
+		HelpText:           data.Get(serviceCatalogVariableHelpText).(string),
+		Instructions:       data.Get(serviceCatalogVariableInstructions).(string),
+		DefaultValue:       data.Get(serviceCatalogVariableDefaultValue).(string),
+		Type:               typeInt,
+		CatalogItem:        data.Get(serviceCatalogVariableCatalogItem).(string),
+		Order:              data.Get(serviceCatalogVariableOrder).(string),
+		ListTable:          data.Get(serviceCatalogVariableListTable).(string),
+		LookupTable:        data.Get(serviceCatalogVariableLookupTable).(string),
+		LookupValue:        data.Get(serviceCatalogVariableLookupValue).(string),
+		Reference:          data.Get(serviceCatalogVariableReference).(string),
+		ReferenceQualifier: data.Get(serviceCatalogVariableReferenceQualifier).(string),
+		ShowHelp:           data.Get(serviceCatalogVariableShowHelp).(bool),
+		Mandatory:          data.Get(serviceCatalogVariableMandatory).(bool),
+		ReadOnly:           data.Get(serviceCatalogVariableReadOnly).(bool),
+		Hidden:             data.Get(serviceCatalogVariableHidden).(bool),
+		Active:             data.Get(serviceCatalogVariableActive).(bool),
 	}
 	serviceCatalogVariable.ID = data.Id()
 	serviceCatalogVariable.Scope = data.Get(commonScope).(string)
