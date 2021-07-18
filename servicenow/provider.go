@@ -50,6 +50,7 @@ func Provider() *schema.Provider {
 			"servicenow_scripted_rest_api":          resources.ResourceScriptedRestApi(),
 			"servicenow_scripted_rest_resource":     resources.ResourceScriptedRestResource(),
 			"servicenow_script_include":             resources.ResourceScriptInclude(),
+			"servicenow_server":                     resources.ResourceServer(),
 			"servicenow_service_catalog":            resources.ResourceServiceCatalog(),
 			"servicenow_service_catalog_category":   resources.ResourceServiceCatalogCategory(),
 			"servicenow_service_catalog_item":       resources.ResourceServiceCatalogItem(),
