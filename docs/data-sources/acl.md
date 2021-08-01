@@ -3,12 +3,12 @@
 page_title: "servicenow_acl Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_acl data source can be used to retrieve information of a single ACL in ServiceNow by Sys ID
 ---
 
 # servicenow_acl (Data Source)
 
-
+`servicenow_acl` data source can be used to retrieve information of a single ACL in ServiceNow by Sys ID
 
 
 

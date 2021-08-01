@@ -3,12 +3,12 @@
 page_title: "servicenow_alias Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_alias manages a connection and credential object within ServiceNow to provide connection details to a Flow Designer action.
 ---
 
 # servicenow_alias (Resource)
 
-
+`servicenow_alias` manages a connection and credential object within ServiceNow to provide connection details to a Flow Designer action.
 
 
 

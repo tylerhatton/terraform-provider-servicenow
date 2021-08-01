@@ -3,12 +3,12 @@
 page_title: "servicenow_system_property_category Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_system_property_category data source can be used to retrieve information of a single system property category in ServiceNow by Sys ID
 ---
 
 # servicenow_system_property_category (Data Source)
 
-
+`servicenow_system_property_category` data source can be used to retrieve information of a single system property category in ServiceNow by Sys ID
 
 
 

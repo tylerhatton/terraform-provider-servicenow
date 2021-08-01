@@ -3,12 +3,12 @@
 page_title: "servicenow_ui_script Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_ui_script manages a UI Script configuration within ServiceNow.
 ---
 
 # servicenow_ui_script (Resource)
 
-
+`servicenow_ui_script` manages a UI Script configuration within ServiceNow.
 
 
 

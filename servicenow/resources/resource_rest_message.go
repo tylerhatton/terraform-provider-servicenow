@@ -14,6 +14,8 @@ const restMessageAuthenticationType = "authentication_type" // No auth is suppor
 // ResourceRestMessage is holding the info about a REST message configuration to be included.
 func ResourceRestMessage() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_rest_message` manages a REST message within ServiceNow.",
+
 		Create: createResourceRestMessage,
 		Read:   readResourceRestMessage,
 		Update: updateResourceRestMessage,

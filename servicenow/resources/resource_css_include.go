@@ -10,9 +10,11 @@ const cssIncludeName = "name"
 const cssIncludeURL = "url"
 const cssIncludeStyleSheetID = "style_sheet_id"
 
-// ResourceCSSInclude is holding the info about a javascript script to be included.
+// ResourceCSSInclude is holding the info about a cascading style sheet to be included.
 func ResourceCSSInclude() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_css_include` manages a cascading style sheet(CSS) within ServiceNow.",
+
 		Create: createResourceCSSInclude,
 		Read:   readResourceCSSInclude,
 		Update: updateResourceCSSInclude,

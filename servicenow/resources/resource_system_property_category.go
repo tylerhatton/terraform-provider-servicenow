@@ -11,6 +11,8 @@ const systemPropertyCategoryTitleHTML = "title_html"
 // ResourceSystemPropertyCategory manages a System Property Category in ServiceNow.
 func ResourceSystemPropertyCategory() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_system_property_category` manages a system property category within ServiceNow.",
+
 		Create: createResourceSystemPropertyCategory,
 		Read:   readResourceSystemPropertyCategory,
 		Update: updateResourceSystemPropertyCategory,

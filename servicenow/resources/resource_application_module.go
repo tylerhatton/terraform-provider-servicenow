@@ -20,6 +20,8 @@ const applicationModuleTableName = "table_name"
 // ResourceApplicationModule is a single link in the application navigator.
 func ResourceApplicationModule() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_application_module` manages an application menu within ServiceNow creating a link in the application navigator.",
+
 		Create: createResourceApplicationModule,
 		Read:   readResourceApplicationModule,
 		Update: updateResourceApplicationModule,

@@ -3,12 +3,12 @@
 page_title: "servicenow_server Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_server manages a server entry within ServiceNow.
 ---
 
 # servicenow_server (Resource)
 
-
+`servicenow_server` manages a server entry within ServiceNow.
 
 
 

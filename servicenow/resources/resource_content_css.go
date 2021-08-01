@@ -13,6 +13,8 @@ const contentCSSStyle = "style"
 // ResourceContentCSS is holding the info about a style sheet to be included.
 func ResourceContentCSS() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_content_css` manages a style sheet(CSS) configuration within ServiceNow.",
+
 		Create: createResourceContentCSS,
 		Read:   readResourceContentCSS,
 		Update: updateResourceContentCSS,

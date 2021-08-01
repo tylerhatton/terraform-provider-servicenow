@@ -3,12 +3,12 @@
 page_title: "servicenow_db_table Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_db_table manages a database table within ServiceNow.
 ---
 
 # servicenow_db_table (Resource)
 
-
+`servicenow_db_table` manages a database table within ServiceNow.
 
 
 

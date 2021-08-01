@@ -14,6 +14,8 @@ const extensionPointAPIName = "api_name"
 // ResourceExtensionPoint is holding the info about a scripted extension point.
 func ResourceExtensionPoint() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_extension_point` manages a scripted extension point within ServiceNow.",
+
 		Create: createResourceExtensionPoint,
 		Read:   readResourceExtensionPoint,
 		Update: updateResourceExtensionPoint,

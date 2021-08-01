@@ -29,8 +29,9 @@ func DataSourceApplicationCategory() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, applicationCategoryName)
 
 	return &schema.Resource{
-		Read:   readResourceApplicationCategory,
-		Schema: resourceSchema,
+		Description: "`servicenow_application_category` data source can be used to retrieve information of a single application category in ServiceNow by Sys ID",
+		Read:        readResourceApplicationCategory,
+		Schema:      resourceSchema,
 	}
 }
 

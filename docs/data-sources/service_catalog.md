@@ -3,12 +3,12 @@
 page_title: "servicenow_service_catalog Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_service_catalog data source can be used to retrieve information of a single service catalog in ServiceNow by Sys ID
 ---
 
 # servicenow_service_catalog (Data Source)
 
-
+`servicenow_service_catalog` data source can be used to retrieve information of a single service catalog in ServiceNow by Sys ID
 
 
 

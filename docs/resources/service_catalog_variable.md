@@ -3,12 +3,12 @@
 page_title: "servicenow_service_catalog_variable Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_service_catalog_variable manages a service catalog variable configuration within ServiceNow.
 ---
 
 # servicenow_service_catalog_variable (Resource)
 
-
+`servicenow_service_catalog_variable` manages a service catalog variable configuration within ServiceNow.
 
 
 

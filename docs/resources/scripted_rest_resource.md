@@ -3,12 +3,12 @@
 page_title: "servicenow_scripted_rest_resource Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_scripted_rest_resource manages a scripted REST resource within ServiceNow.
 ---
 
 # servicenow_scripted_rest_resource (Resource)
 
-
+`servicenow_scripted_rest_resource` manages a scripted REST resource within ServiceNow.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "servicenow_css_include Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_css_include manages a cascading style sheet(CSS) within ServiceNow.
 ---
 
 # servicenow_css_include (Resource)
 
-
+`servicenow_css_include` manages a cascading style sheet(CSS) within ServiceNow.
 
 
 

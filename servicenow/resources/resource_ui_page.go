@@ -17,6 +17,8 @@ const uiPageEndpoint = "endpoint"
 // ResourceUIPage manages a UI Page in ServiceNow.
 func ResourceUIPage() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_ui_page` manages a UI Page configuration within ServiceNow.",
+
 		Create: createResourceUIPage,
 		Read:   readResourceUIPage,
 		Update: updateResourceUIPage,

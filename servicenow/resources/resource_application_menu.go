@@ -17,6 +17,8 @@ const applicationMenuActive = "active"
 // ResourceApplicationMenu is a group of modules in the application navigator.
 func ResourceApplicationMenu() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_application_menu` manages an application menu within ServiceNow creating a new section in the application navigator.",
+
 		Create: createResourceApplicationMenu,
 		Read:   readResourceApplicationMenu,
 		Update: updateResourceApplicationMenu,

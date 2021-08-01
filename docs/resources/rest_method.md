@@ -3,12 +3,12 @@
 page_title: "servicenow_rest_method Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_rest_method manages a REST method within ServiceNow.
 ---
 
 # servicenow_rest_method (Resource)
 
-
+`servicenow_rest_method` manages a REST method within ServiceNow.
 
 
 

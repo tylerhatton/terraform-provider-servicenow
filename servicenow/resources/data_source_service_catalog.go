@@ -12,8 +12,9 @@ func DataSourceServiceCatalog() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, serviceCatalogTitle)
 
 	return &schema.Resource{
-		Read:   readDataSourceServiceCatalog,
-		Schema: resourceSchema,
+		Description: "`servicenow_service_catalog` data source can be used to retrieve information of a single service catalog in ServiceNow by Sys ID",
+		Read:        readDataSourceServiceCatalog,
+		Schema:      resourceSchema,
 	}
 }
 

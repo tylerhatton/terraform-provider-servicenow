@@ -3,12 +3,12 @@
 page_title: "servicenow_service_catalog Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_service_catalog manages a service catalog configuration within ServiceNow.
 ---
 
 # servicenow_service_catalog (Resource)
 
-
+`servicenow_service_catalog` manages a service catalog configuration within ServiceNow.
 
 
 

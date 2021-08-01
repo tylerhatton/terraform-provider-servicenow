@@ -12,6 +12,8 @@ const applicationVersion = "version"
 // ResourceApplication manages an Application in ServiceNow.
 func ResourceApplication() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_application` manages an application within ServiceNow.",
+
 		Create: createResourceApplication,
 		Read:   readResourceApplication,
 		Update: updateResourceApplication,

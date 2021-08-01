@@ -12,6 +12,8 @@ const systemPropertyRelationOrder = "order"
 // ResourceSystemPropertyRelation manages a System Property in ServiceNow.
 func ResourceSystemPropertyRelation() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_system_property_relation` manages a relation between system property and system property category within ServiceNow.",
+
 		Create: createResourceSystemPropertyRelation,
 		Read:   readResourceSystemPropertyRelation,
 		Update: updateResourceSystemPropertyRelation,

@@ -3,12 +3,12 @@
 page_title: "servicenow_content_css Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_content_css manages a style sheet(CSS) configuration within ServiceNow.
 ---
 
 # servicenow_content_css (Resource)
 
-
+`servicenow_content_css` manages a style sheet(CSS) configuration within ServiceNow.
 
 
 

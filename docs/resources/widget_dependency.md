@@ -3,12 +3,12 @@
 page_title: "servicenow_widget_dependency Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_widget_dependency manages JS and CSS includes for a Widget configuration within ServiceNow.
 ---
 
 # servicenow_widget_dependency (Resource)
 
-
+`servicenow_widget_dependency` manages JS and CSS includes for a Widget configuration within ServiceNow.
 
 
 

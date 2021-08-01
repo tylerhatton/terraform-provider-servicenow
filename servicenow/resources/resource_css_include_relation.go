@@ -12,6 +12,8 @@ const cssIncludeRelationOrder = "order"
 // ResourceCSSIncludeRelation is holding the info about the relation between a CSS Include and a widget dependency.
 func ResourceCSSIncludeRelation() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_css_include_relation` manages a relation between a CSS include and a widget dependency within ServiceNow.",
+
 		Create: createResourceCSSIncludeRelation,
 		Read:   readResourceCSSIncludeRelation,
 		Update: updateResourceCSSIncludeRelation,

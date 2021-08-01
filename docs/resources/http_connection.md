@@ -3,12 +3,12 @@
 page_title: "servicenow_http_connection Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_http_connection manages a HTTP connection configuration within ServiceNow.
 ---
 
 # servicenow_http_connection (Resource)
 
-
+`servicenow_http_connection` manages a HTTP connection configuration within ServiceNow.
 
 
 

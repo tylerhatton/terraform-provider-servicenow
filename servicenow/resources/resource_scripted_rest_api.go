@@ -20,6 +20,8 @@ const scriptedRestApiShortDescription = "short_description"
 func ResourceScriptedRestApi() *schema.Resource {
 
 	return &schema.Resource{
+		Description: "`servicenow_scripted_rest_api` manages a scripted REST API within ServiceNow.",
+
 		Create: createResourceScriptedRestApi,
 		Read:   readResourceScriptedRestApi,
 		Update: updateResourceScriptedRestApi,

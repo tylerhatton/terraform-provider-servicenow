@@ -12,8 +12,9 @@ func DataSourceApplication() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, applicationName)
 
 	return &schema.Resource{
-		Read:   readDataSourceApplication,
-		Schema: resourceSchema,
+		Description: "`servicenow_application` data source can be used to retrieve information of a single application in ServiceNow by Sys ID",
+		Read:        readDataSourceApplication,
+		Schema:      resourceSchema,
 	}
 }
 

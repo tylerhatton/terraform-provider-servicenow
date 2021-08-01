@@ -3,12 +3,12 @@
 page_title: "servicenow_role Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_rest_method manages a role within ServiceNow.
 ---
 
 # servicenow_role (Resource)
 
-
+`servicenow_rest_method` manages a role within ServiceNow.
 
 
 

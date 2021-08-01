@@ -3,12 +3,12 @@
 page_title: "servicenow_rest_message Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_rest_message manages a REST message within ServiceNow.
 ---
 
 # servicenow_rest_message (Resource)
 
-
+`servicenow_rest_message` manages a REST message within ServiceNow.
 
 
 

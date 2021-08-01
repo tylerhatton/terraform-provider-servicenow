@@ -12,8 +12,9 @@ func DataSourceSystemProperty() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, systemPropertyName)
 
 	return &schema.Resource{
-		Read:   readDataSourceSystemProperty,
-		Schema: resourceSchema,
+		Description: "`servicenow_system_property` data source can be used to retrieve information of a single system property in ServiceNow by Sys ID",
+		Read:        readDataSourceSystemProperty,
+		Schema:      resourceSchema,
 	}
 }
 

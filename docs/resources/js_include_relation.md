@@ -3,12 +3,12 @@
 page_title: "servicenow_js_include_relation Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_js_include_relation manages a relation between a js include and a widget dependency within ServiceNow.
 ---
 
 # servicenow_js_include_relation (Resource)
 
-
+`servicenow_js_include_relation` manages a relation between a js include and a widget dependency within ServiceNow.
 
 
 

@@ -30,6 +30,8 @@ const serverIpAddress = "ip_address"
 // ResourceServer manages a server cmdb entry in ServiceNow.
 func ResourceServer() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_server` manages a server entry within ServiceNow.",
+
 		Create: createResourceServer,
 		Read:   readResourceServer,
 		Update: updateResourceServer,

@@ -3,12 +3,12 @@
 page_title: "servicenow_system_property Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_system_property manages a system property within ServiceNow.
 ---
 
 # servicenow_system_property (Resource)
 
-
+`servicenow_system_property` manages a system property within ServiceNow.
 
 
 

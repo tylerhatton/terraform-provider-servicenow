@@ -21,6 +21,8 @@ const dbTableName = "name"
 // ResourceDBTable manages a DBTable in ServiceNow.
 func ResourceDBTable() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_db_table` manages a database table within ServiceNow.",
+
 		Create: createResourceDBTable,
 		Read:   readResourceDBTable,
 		Update: updateResourceDBTable,

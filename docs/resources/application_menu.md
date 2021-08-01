@@ -3,12 +3,12 @@
 page_title: "servicenow_application_menu Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_application_menu manages an application menu within ServiceNow creating a new section in the application navigator.
 ---
 
 # servicenow_application_menu (Resource)
 
-
+`servicenow_application_menu` manages an application menu within ServiceNow creating a new section in the application navigator.
 
 
 

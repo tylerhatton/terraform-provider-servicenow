@@ -11,6 +11,8 @@ const widgetDepRelationWidgetID = "widget_id"
 // ResourceWidgetDependencyRelation is holding the relationship between a widget and a widget dependency (many-2-many).
 func ResourceWidgetDependencyRelation() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_widget_dependency_relation` manages a relationship between widget and widget dependency within ServiceNow.",
+
 		Create: createResourceWidgetDepRelation,
 		Read:   readResourceWidgetDepRelation,
 		Update: updateResourceWidgetDepRelation,

@@ -70,8 +70,9 @@ func DataSourceACL() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, aclName)
 
 	return &schema.Resource{
-		Read:   readDataSourceACL,
-		Schema: resourceSchema,
+		Description: "`servicenow_acl` data source can be used to retrieve information of a single ACL in ServiceNow by Sys ID",
+		Read:        readDataSourceACL,
+		Schema:      resourceSchema,
 	}
 }
 

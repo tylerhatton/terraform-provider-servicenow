@@ -16,6 +16,8 @@ const questionChoiceInactive = "inactive"
 // ResourceQuestionChoice manages a Question Choice in ServiceNow.
 func ResourceQuestionChoice() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_question_choice` manages a question choice within ServiceNow.",
+
 		Create: createResourceQuestionChoice,
 		Read:   readResourceQuestionChoice,
 		Update: updateResourceQuestionChoice,

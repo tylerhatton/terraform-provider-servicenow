@@ -12,6 +12,8 @@ const restMessageHeaderMessageID = "rest_message_id"
 // ResourceRestMessageHeader is holding the info about a header to be applied to a REST method.
 func ResourceRestMessageHeader() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_rest_message_header` manages a header to be applied to a REST message within ServiceNow.",
+
 		Create: createResourceRestMessageHeader,
 		Read:   readResourceRestMessageHeader,
 		Update: updateResourceRestMessageHeader,
