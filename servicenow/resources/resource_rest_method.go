@@ -15,6 +15,8 @@ const restMethodQualifiedName = "qualified_name"
 // ResourceRestMethod is holding the info about a REST method to be included in a REST message.
 func ResourceRestMethod() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_rest_method` manages a REST method within ServiceNow.",
+
 		Create: createResourceRestMethod,
 		Read:   readResourceRestMethod,
 		Update: updateResourceRestMethod,

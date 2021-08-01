@@ -3,12 +3,12 @@
 page_title: "servicenow_rest_method_header Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_rest_message_header manages a header to be applied to a REST method within ServiceNow.
 ---
 
 # servicenow_rest_method_header (Resource)
 
-
+`servicenow_rest_message_header` manages a header to be applied to a REST method within ServiceNow.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "servicenow_extension_point Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_extension_point manages a scripted extension point within ServiceNow.
 ---
 
 # servicenow_extension_point (Resource)
 
-
+`servicenow_extension_point` manages a scripted extension point within ServiceNow.
 
 
 

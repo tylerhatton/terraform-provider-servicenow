@@ -3,12 +3,12 @@
 page_title: "servicenow_question_choice Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_question_choice manages a question choice within ServiceNow.
 ---
 
 # servicenow_question_choice (Resource)
 
-
+`servicenow_question_choice` manages a question choice within ServiceNow.
 
 
 

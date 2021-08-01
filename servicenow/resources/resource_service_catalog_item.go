@@ -21,6 +21,8 @@ const serviceCatalogItemActive = "active"
 // ResourceServiceCatalogItem manages a Service Catalog Item in ServiceNow.
 func ResourceServiceCatalogItem() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_service_catalog_category` manages a service catalog item configuration within ServiceNow.",
+
 		Create: createResourceServiceCatalogItem,
 		Read:   readResourceServiceCatalogItem,
 		Update: updateResourceServiceCatalogItem,

@@ -16,6 +16,8 @@ const scriptIncludeAPIName = "api_name"
 // ResourceScriptInclude manages a Script Include in ServiceNow.
 func ResourceScriptInclude() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_rest_method` manages a script include within ServiceNow.",
+
 		Create: createResourceScriptInclude,
 		Read:   readResourceScriptInclude,
 		Update: updateResourceScriptInclude,

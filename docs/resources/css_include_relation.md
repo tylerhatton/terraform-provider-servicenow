@@ -3,12 +3,12 @@
 page_title: "servicenow_css_include_relation Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_css_include_relation manages a relation between a CSS include and a widget dependency within ServiceNow.
 ---
 
 # servicenow_css_include_relation (Resource)
 
-
+`servicenow_css_include_relation` manages a relation between a CSS include and a widget dependency within ServiceNow.
 
 
 

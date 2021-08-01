@@ -12,8 +12,9 @@ func DataSourceDBTable() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, dbTableName)
 
 	return &schema.Resource{
-		Read:   readDataSourceDBTable,
-		Schema: resourceSchema,
+		Description: "`servicenow_db_table` data source can be used to retrieve information of a single database in ServiceNow by Name",
+		Read:        readDataSourceDBTable,
+		Schema:      resourceSchema,
 	}
 }
 

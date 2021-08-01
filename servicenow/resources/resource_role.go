@@ -14,6 +14,8 @@ const roleName = "name"
 // ResourceRole manages a Role in ServiceNow.
 func ResourceRole() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_rest_method` manages a role within ServiceNow.",
+
 		Create: createResourceRole,
 		Read:   readResourceRole,
 		Update: updateResourceRole,

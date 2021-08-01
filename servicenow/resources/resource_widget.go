@@ -24,6 +24,8 @@ const widgetControllerAs = "controller_as"
 // ResourceWidget manages a Widget in ServiceNow.
 func ResourceWidget() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_widget` manages a Widget configuration within ServiceNow.",
+
 		Create: createResourceWidget,
 		Read:   readResourceWidget,
 		Update: updateResourceWidget,

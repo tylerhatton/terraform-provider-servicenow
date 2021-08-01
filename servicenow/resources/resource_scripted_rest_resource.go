@@ -26,6 +26,8 @@ const scriptedRestResourceWebServiceVersion = "web_service_version"
 func ResourceScriptedRestResource() *schema.Resource {
 
 	return &schema.Resource{
+		Description: "`servicenow_scripted_rest_resource` manages a scripted REST resource within ServiceNow.",
+
 		Create: createResourceScriptedRestResource,
 		Read:   readResourceScriptedRestResource,
 		Update: updateResourceScriptedRestResource,

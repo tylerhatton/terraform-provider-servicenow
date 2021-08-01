@@ -3,12 +3,12 @@
 page_title: "servicenow_system_property Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_system_property data source can be used to retrieve information of a single system property in ServiceNow by Sys ID
 ---
 
 # servicenow_system_property (Data Source)
 
-
+`servicenow_system_property` data source can be used to retrieve information of a single system property in ServiceNow by Sys ID
 
 
 

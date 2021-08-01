@@ -14,6 +14,8 @@ const uiMacroActive = "active"
 // ResourceUIMacro manages a UI Macro in ServiceNow.
 func ResourceUIMacro() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_ui_macro` manages a UI Macro configuration within ServiceNow.",
+
 		Create: createResourceUIMacro,
 		Read:   readResourceUIMacro,
 		Update: updateResourceUIMacro,

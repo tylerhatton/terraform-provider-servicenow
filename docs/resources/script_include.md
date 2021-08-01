@@ -3,12 +3,12 @@
 page_title: "servicenow_script_include Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_rest_method manages a script include within ServiceNow.
 ---
 
 # servicenow_script_include (Resource)
 
-
+`servicenow_rest_method` manages a script include within ServiceNow.
 
 
 

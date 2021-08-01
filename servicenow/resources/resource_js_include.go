@@ -13,6 +13,8 @@ const jsIncludeUIScriptID = "ui_script_id"
 // ResourceJsInclude is holding the info about a javascript script to be included.
 func ResourceJsInclude() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_js_include` manages a javascript script within ServiceNow.",
+
 		Create: createResourceJsInclude,
 		Read:   readResourceJsInclude,
 		Update: updateResourceJsInclude,

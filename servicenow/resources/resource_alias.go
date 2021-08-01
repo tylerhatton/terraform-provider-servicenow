@@ -16,6 +16,8 @@ const aliasConfigurationTemplate = "configuration_template"
 // ResourceAlias manages a connection and credential object in ServiceNow.
 func ResourceAlias() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_alias` manages a connection and credential object within ServiceNow to provide connection details to a Flow Designer action.",
+
 		Create: createResourceAlias,
 		Read:   readResourceAlias,
 		Update: updateResourceAlias,

@@ -3,12 +3,12 @@
 page_title: "servicenow_widget Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_widget manages a Widget configuration within ServiceNow.
 ---
 
 # servicenow_widget (Resource)
 
-
+`servicenow_widget` manages a Widget configuration within ServiceNow.
 
 
 

@@ -12,8 +12,9 @@ func DataSourceSystemPropertyCategory() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, systemPropertyCategoryName)
 
 	return &schema.Resource{
-		Read:   readDataSourceSystemPropertyCategory,
-		Schema: resourceSchema,
+		Description: "`servicenow_system_property_category` data source can be used to retrieve information of a single system property category in ServiceNow by Sys ID",
+		Read:        readDataSourceSystemPropertyCategory,
+		Schema:      resourceSchema,
 	}
 }
 

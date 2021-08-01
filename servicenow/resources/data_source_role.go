@@ -12,8 +12,9 @@ func DataSourceRole() *schema.Resource {
 	setOnlyRequiredSchema(resourceSchema, roleName)
 
 	return &schema.Resource{
-		Read:   readDataSourceRole,
-		Schema: resourceSchema,
+		Description: "`servicenow_role` data source can be used to retrieve information of a single role in ServiceNow by Sys ID",
+		Read:        readDataSourceRole,
+		Schema:      resourceSchema,
 	}
 }
 

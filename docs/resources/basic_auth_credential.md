@@ -3,12 +3,12 @@
 page_title: "servicenow_basic_auth_credential Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_basic_auth_credential manages a basic auth credential configuration within ServiceNow.
 ---
 
 # servicenow_basic_auth_credential (Resource)
 
-
+`servicenow_basic_auth_credential` manages a basic auth credential configuration within ServiceNow.
 
 
 

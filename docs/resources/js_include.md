@@ -3,12 +3,12 @@
 page_title: "servicenow_js_include Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_js_include manages a javascript script within ServiceNow.
 ---
 
 # servicenow_js_include (Resource)
 
-
+`servicenow_js_include` manages a javascript script within ServiceNow.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "servicenow_application_module Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_application_module manages an application menu within ServiceNow creating a link in the application navigator.
 ---
 
 # servicenow_application_module (Resource)
 
-
+`servicenow_application_module` manages an application menu within ServiceNow creating a link in the application navigator.
 
 
 

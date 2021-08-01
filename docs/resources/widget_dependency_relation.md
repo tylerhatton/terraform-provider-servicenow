@@ -3,12 +3,12 @@
 page_title: "servicenow_widget_dependency_relation Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_widget_dependency_relation manages a relationship between widget and widget dependency within ServiceNow.
 ---
 
 # servicenow_widget_dependency_relation (Resource)
 
-
+`servicenow_widget_dependency_relation` manages a relationship between widget and widget dependency within ServiceNow.
 
 
 

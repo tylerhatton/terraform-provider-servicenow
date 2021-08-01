@@ -14,6 +14,8 @@ const basicAuthCredentialCredentialAlias = "credential_alias"
 // ResourceBasicAuthCredential manages a basic authentication credential in ServiceNow.
 func ResourceBasicAuthCredential() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_basic_auth_credential` manages a basic auth credential configuration within ServiceNow.",
+
 		Create: createResourceBasicAuthCredential,
 		Read:   readResourceBasicAuthCredential,
 		Update: updateResourceBasicAuthCredential,

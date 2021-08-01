@@ -18,6 +18,8 @@ const systemPropertyName = "name"
 // ResourceSystemProperty manages a System Property in ServiceNow.
 func ResourceSystemProperty() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_system_property` manages a system property within ServiceNow.",
+
 		Create: createResourceSystemProperty,
 		Read:   readResourceSystemProperty,
 		Update: updateResourceSystemProperty,

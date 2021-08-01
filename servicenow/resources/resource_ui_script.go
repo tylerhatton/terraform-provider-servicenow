@@ -15,6 +15,8 @@ const uiScriptAPIName = "api_name"
 // ResourceUIScript manages a UI Script in ServiceNow which can be added to any other UI component.
 func ResourceUIScript() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_ui_script` manages a UI Script configuration within ServiceNow.",
+
 		Create: createResourceUIScript,
 		Read:   readResourceUIScript,
 		Update: updateResourceUIScript,

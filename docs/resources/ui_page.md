@@ -3,12 +3,12 @@
 page_title: "servicenow_ui_page Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_ui_page manages a UI Page configuration within ServiceNow.
 ---
 
 # servicenow_ui_page (Resource)
 
-
+`servicenow_ui_page` manages a UI Page configuration within ServiceNow.
 
 
 

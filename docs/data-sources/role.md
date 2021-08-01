@@ -3,12 +3,12 @@
 page_title: "servicenow_role Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_role data source can be used to retrieve information of a single role in ServiceNow by Sys ID
 ---
 
 # servicenow_role (Data Source)
 
-
+`servicenow_role` data source can be used to retrieve information of a single role in ServiceNow by Sys ID
 
 
 

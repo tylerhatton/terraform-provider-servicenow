@@ -19,6 +19,8 @@ const serviceCatalogEnableWishList = "enable_wish_list"
 // ResourceServieCatalog manages a Service Catalog object in ServiceNow.
 func ResourceServiceCatalog() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_service_catalog` manages a service catalog configuration within ServiceNow.",
+
 		Create: createResourceServiceCatalog,
 		Read:   readResourceServiceCatalog,
 		Update: updateResourceServiceCatalog,

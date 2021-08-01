@@ -17,6 +17,8 @@ const oauthEntityAccess = "access"
 // ResourceOAuthEntity manages an OAuthEntity in ServiceNow.
 func ResourceOAuthEntity() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_js_include` manages a javascript script within ServiceNow.",
+
 		Create: createResourceOAuthEntity,
 		Read:   readResourceOAuthEntity,
 		Update: updateResourceOAuthEntity,

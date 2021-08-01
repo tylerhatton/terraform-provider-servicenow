@@ -12,6 +12,8 @@ const widgetDependencyPageLoad = "page_load"
 // ResourceWidgetDependency is holding the info about a javascript script to be included.
 func ResourceWidgetDependency() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_widget_dependency` manages JS and CSS includes for a Widget configuration within ServiceNow.",
+
 		Create: createResourceWidgetDependency,
 		Read:   readResourceWidgetDependency,
 		Update: updateResourceWidgetDependency,

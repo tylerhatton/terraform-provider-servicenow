@@ -3,12 +3,12 @@
 page_title: "servicenow_application Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_application manages an application within ServiceNow.
 ---
 
 # servicenow_application (Resource)
 
-
+`servicenow_application` manages an application within ServiceNow.
 
 
 

@@ -3,12 +3,12 @@
 page_title: "servicenow_db_table Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_db_table data source can be used to retrieve information of a single database in ServiceNow by Name
 ---
 
 # servicenow_db_table (Data Source)
 
-
+`servicenow_db_table` data source can be used to retrieve information of a single database in ServiceNow by Name
 
 
 

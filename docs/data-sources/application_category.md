@@ -3,12 +3,12 @@
 page_title: "servicenow_application_category Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_application_category data source can be used to retrieve information of a single application category in ServiceNow by Sys ID
 ---
 
 # servicenow_application_category (Data Source)
 
-
+`servicenow_application_category` data source can be used to retrieve information of a single application category in ServiceNow by Sys ID
 
 
 

@@ -12,6 +12,8 @@ const jsIncludeRelationOrder = "order"
 // ResourceJsIncludeRelation is holding the info about the relation between a js include and a widget dependency.
 func ResourceJsIncludeRelation() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_js_include_relation` manages a relation between a js include and a widget dependency within ServiceNow.",
+
 		Create: createResourceJsIncludeRelation,
 		Read:   readResourceJsIncludeRelation,
 		Update: updateResourceJsIncludeRelation,

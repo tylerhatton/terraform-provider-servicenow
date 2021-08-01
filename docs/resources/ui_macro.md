@@ -3,12 +3,12 @@
 page_title: "servicenow_ui_macro Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_ui_macro manages a UI Macro configuration within ServiceNow.
 ---
 
 # servicenow_ui_macro (Resource)
 
-
+`servicenow_ui_macro` manages a UI Macro configuration within ServiceNow.
 
 
 

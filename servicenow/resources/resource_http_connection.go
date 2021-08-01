@@ -17,6 +17,8 @@ const httpConnectionMidServer = "mid_server"
 // ResourceHttpConnection manages an HTTP Connection configuration in ServiceNow.
 func ResourceHttpConnection() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_http_connection` manages a HTTP connection configuration within ServiceNow.",
+
 		Create: createResourceHttpConnection,
 		Read:   readResourceHttpConnection,
 		Update: updateResourceHttpConnection,

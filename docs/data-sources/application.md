@@ -3,12 +3,12 @@
 page_title: "servicenow_application Data Source - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_application data source can be used to retrieve information of a single application in ServiceNow by Sys ID
 ---
 
 # servicenow_application (Data Source)
 
-
+`servicenow_application` data source can be used to retrieve information of a single application in ServiceNow by Sys ID
 
 
 

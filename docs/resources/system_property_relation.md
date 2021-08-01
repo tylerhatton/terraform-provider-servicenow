@@ -3,12 +3,12 @@
 page_title: "servicenow_system_property_relation Resource - terraform-provider-servicenow"
 subcategory: ""
 description: |-
-  
+  servicenow_system_property_relation manages a relation between system property and system property category within ServiceNow.
 ---
 
 # servicenow_system_property_relation (Resource)
 
-
+`servicenow_system_property_relation` manages a relation between system property and system property category within ServiceNow.
 
 
 

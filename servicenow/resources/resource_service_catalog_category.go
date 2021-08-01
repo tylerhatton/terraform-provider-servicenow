@@ -18,6 +18,8 @@ const serviceCatalogCategoryActive = "active"
 // ResourceServieCatalogCategory manages a Service Catalog Category objects in ServiceNow.
 func ResourceServiceCatalogCategory() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_service_catalog_category` manages a service catalog category configuration within ServiceNow.",
+
 		Create: createResourceServiceCatalogCategory,
 		Read:   readResourceServiceCatalogCategory,
 		Update: updateResourceServiceCatalogCategory,

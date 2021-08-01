@@ -29,6 +29,8 @@ const serviceCatalogVariableActive = "active"
 // ResourceServiceCatalogVariable manages a service catalog variable in ServiceNow.
 func ResourceServiceCatalogVariable() *schema.Resource {
 	return &schema.Resource{
+		Description: "`servicenow_service_catalog_variable` manages a service catalog variable configuration within ServiceNow.",
+
 		Create: createResourceServiceCatalogVariable,
 		Read:   readResourceServiceCatalogVariable,
 		Update: updateResourceServiceCatalogVariable,
