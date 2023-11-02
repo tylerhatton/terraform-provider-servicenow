@@ -24,6 +24,6 @@ provider "servicenow" {
 
 ### Required
 
-- **instance_url** (String) The Url of the ServiceNow instance to work with.
-- **password** (String, Sensitive) Password of the user to manage resources.
-- **username** (String) Username used to manage resources in the ServiceNow instance using Basic authentication.
+- **instance_url** (String) The Url of the ServiceNow instance to work with. Value can also be sourced from the SERVICENOW_INSTANCE_URL environment variable.
+- **password** (String, Sensitive) Password of the user to manage resources. Value can also be sourced from the SERVICENOW_USERNAME environment variable.
+- **username** (String) Username used to manage resources in the ServiceNow instance using Basic authentication. Value can also be sourced from the SERVICENOW_PASSWORD environment variable.

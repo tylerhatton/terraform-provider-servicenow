@@ -12,19 +12,25 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"instance_url": {
 				Type:        schema.TypeString,
-				Description: "The Url of the ServiceNow instance to work with.",
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SERVICENOW_INSTANCE_URL", nil),
+				Description: "The Url of the ServiceNow instance to work with. " +
+					"Value can also be sourced from the SERVICENOW_INSTANCE_URL environment variable.",
 			},
 			"username": {
 				Type:        schema.TypeString,
-				Description: "Username used to manage resources in the ServiceNow instance using Basic authentication.",
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SERVICENOW_USER", nil),
+				Description: "Username used to manage resources in the ServiceNow instance using Basic authentication. " +
+					"Value can also be sourced from the SERVICENOW_USER environment variable.",
 			},
 			"password": {
 				Type:        schema.TypeString,
-				Description: "Password of the user to manage resources.",
 				Required:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("SERVICENOW_PASSWORD", nil),
+				Description: "Password of the user to manage resources. " +
+					"Value can also be sourced from the SERVICENOW_PASSWORD environment variable.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
