@@ -12,13 +12,7 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
-      - name: Setup CI Environment
-        id: setupenv
-        run: make setupenv >> $GITHUB_OUTPUT
-      - name: Unshallow
-        run: git fetch --prune --unshallow
-      - name: Set up Golang
-        uses: agilesyndrome/github-actions/envgolang
-      # GoReleaser Action
+      - name: CI
+        uses: agilesyndrome/github-actions
+        makefile_target: ci
+

@@ -18,17 +18,6 @@ TERRAFORM_CMD:=$(shell which terraform || "echo")
 
 ci: build unit-test
 
-
-# We can reference these in GH Actions as ${{steps.setupenv.outputs.VAR_NAME}}
-setupenv:
-	@echo "NAMESPACE=$(NAMESPACE)"
-	@echo "NAME=$(NAME)"
-	@echo "BINARY=$(BINARY)"
-	@echo "OS_ARCH=$(OS_ARCH)"
-	@echo "GO_VERSION=$(GO_VERSION)"
-	@echo "GORELEASER_VERSION=$(GORELEASER_VERSION)"
-	@echo "TERRAFORM_CMD=$(TERRAFORM_CMD)"
-
 asdf:
 	@asdf plugin-add goreleaser https://github.com/kforsthoevel/asdf-goreleaser.git
 	@asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
