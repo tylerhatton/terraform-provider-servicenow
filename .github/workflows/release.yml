@@ -7,6 +7,7 @@ on:
       - main
       - master
       - 'releases/**'
+      - 'ci/**'
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -27,10 +28,11 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2.5.0
+        uses: goreleaser/goreleaser-action@v5.0.0
         with:
+          distribution: goreleaser # or goreleaser-pro
           version: latest
-          args: release --rm-dist
+          args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           # GitHub sets this automatically
