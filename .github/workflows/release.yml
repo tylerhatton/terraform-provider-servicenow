@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: CI
-        uses: agilesyndrome/github-actions@43ad992957a542ac6895f6d3a158c7c4d847e523
+        uses: agilesyndrome/github-actions@acd15dfe5e3add2cd1812fb5f9d2dcd36e0d6c14
         with:
           makefile_target: ci
 
