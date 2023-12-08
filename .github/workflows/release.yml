@@ -5,15 +5,14 @@ on:
       - "v*"
     branches:
       - main
-      - master
       - 'releases/**'
       - 'ci/**'
 jobs:
-  goreleaser:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - name: CI
         uses: agilesyndrome/github-actions@main
         with:
-          makefile_target: build
+          makefile_target: ci
 
