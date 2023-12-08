@@ -10,13 +10,11 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    #runs-on: [self-hosted, cloud3b]
     steps:
       - name: CI
-        uses: agilesyndrome/github-actions@d816ef8ea0c375e0b3029b9f57ff3f2989d458cc
-
-
-
+        uses: agilesyndrome/github-actions@main
         with:
           makefile_target: ci
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg_passphrase: ${{ secrets.PASSPHRASE }}
