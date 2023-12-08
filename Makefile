@@ -1,12 +1,37 @@
 TEST?=$$(go list ./... | grep -v 'vendor')
 HOSTNAME=tyler.sh
-NAMESPACE=tylerhatton
+
+# Set namespace equal to the Git organization or user
+NAMESPACE=$(shell git config --get remote.origin.url |  awk '{split($0,a,"/"); print a[4]}')
 NAME=servicenow
 BINARY=terraform-provider-${NAME}
-VERSION=0.9.7-snapshot
-OS_ARCH=linux_amd64
+VERSION=$(shell cat VERSION)
+OS_NAME=$(shell uname -o | awk '{print tolower($0)}')
+HARDWARE_NAME=$(shell uname -m | awk '{print tolower($0)}' )
+OS_ARCH=$(OS_NAME)_$(HARDWARE_NAME)
+GO_VERSION=$(shell cat .tool-versions |grep '^golang' | awk '{print $$2}')
+GORELEASER_VERSION=$(shell cat .tool-versions | grep '^goreleaser' | awk '{print $$2}')
 
-default: install
+# Allow us to specify where to find the Terraform binary
+# but don't fail if our CI environment doesn't have it installed
+TERRAFORM_CMD:=$(shell which terraform || "echo")
+
+ci: build unit-test
+
+
+# We can reference these in GH Actions as ${{steps.setupenv.outputs.VAR_NAME}}
+setupenv:
+	@echo "NAMESPACE=$(NAMESPACE)"
+	@echo "NAME=$(NAME)"
+	@echo "BINARY=$(BINARY)"
+	@echo "OS_ARCH=$(OS_ARCH)"
+	@echo "GO_VERSION=$(GO_VERSION)"
+	@echo "GORELEASER_VERSION=$(GORELEASER_VERSION)"
+	@echo "TERRAFORM_CMD=$(TERRAFORM_CMD)"
+
+asdf:
+	@asdf plugin-add goreleaser https://github.com/kforsthoevel/asdf-goreleaser.git
+	@asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 
 build:
 	go build -o ${BINARY}
@@ -29,9 +54,19 @@ install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
-test: 
+test: unit-test
+
+unit-test:
 	go test -i $(TEST) || exit 1                                                   
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
 
-testacc: 
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
+# Acceptance tests typically create and destroy actual infrastructure resources, possibly incurring expenses during or after the test duration.
+# See acceptance-test docs: https://developer.hashicorp.com/terraform/plugin/sdkv2/testing/acceptance-tests
+
+# Renaming for better visibility. Alias for backwards compatibility
+testacc: acceptance-test
+
+acceptance-test:
+	TF_ACC=1 \
+	TF_ACC_TERRAFORM_PATH=$(TERRAFORM_CMD)
+	go test $(TEST) -v $(TESTARGS) -timeout 120m
