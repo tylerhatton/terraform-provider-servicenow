@@ -16,4 +16,5 @@ jobs:
         uses: agilesyndrome/github-actions@fixup-ci
         with:
           makefile_target: ci
+          action_version: fixup-ci
 
