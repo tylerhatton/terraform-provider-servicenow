@@ -14,5 +14,6 @@ jobs:
     steps:
       - name: CI
         uses: agilesyndrome/github-actions@main
-        makefile_target: ci
+        with:
+          makefile_target: ci
 
