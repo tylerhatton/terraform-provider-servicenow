@@ -9,8 +9,8 @@ on:
       - 'ci/**'
 jobs:
   ci:
-    #runs-on: ubuntu-latest
-    runs-on: [self-hosted, cloud3b]
+    runs-on: ubuntu-latest
+    #runs-on: [self-hosted, cloud3b]
     steps:
       - name: CI
         uses: agilesyndrome/github-actions@fixup-ci
