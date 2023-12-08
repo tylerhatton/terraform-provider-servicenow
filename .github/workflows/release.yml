@@ -5,6 +5,7 @@ on:
       - "v*"
     branches:
       - main
+      - master
       - 'releases/**'
 jobs:
   goreleaser:
