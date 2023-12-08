@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: CI
-        uses: agilesyndrome/github-actions
+        uses: agilesyndrome/github-actions@main
         makefile_target: ci
 
