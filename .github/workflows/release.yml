@@ -9,10 +9,11 @@ on:
       - 'ci/**'
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: cloud-3b
     steps:
       - name: CI
-        uses: agilesyndrome/github-actions@acd15dfe5e3add2cd1812fb5f9d2dcd36e0d6c14
+        uses: agilesyndrome/github-actions@fixup-ci
         with:
           makefile_target: ci
 
