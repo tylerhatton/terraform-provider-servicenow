@@ -13,8 +13,8 @@ jobs:
     #runs-on: [self-hosted, cloud3b]
     steps:
       - name: CI
-        uses: agilesyndrome/github-actions@ffe21a1d8313f3056bb4e3cee2652399f64f59f4
+        uses: agilesyndrome/github-actions@233e902669324b66431280bcaed099d6fe694b52
         with:
           makefile_target: ci
-          action_version: ffe21a1d8313f3056bb4e3cee2652399f64f59f4
+          action_version: 233e902669324b66431280bcaed099d6fe694b52
 
