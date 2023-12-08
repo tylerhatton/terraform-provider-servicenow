@@ -2,3 +2,4 @@ terraform-provider-servicenow*
 .vscode
 .idea
 coverage.out
+dist/
