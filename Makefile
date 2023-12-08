@@ -3,7 +3,7 @@ HOSTNAME=tyler.sh
 NAMESPACE=tylerhatton
 NAME=servicenow
 BINARY=terraform-provider-${NAME}
-VERSION=0.9.3
+VERSION=0.9.7-snapshot
 OS_ARCH=linux_amd64
 
 default: install
