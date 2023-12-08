@@ -15,5 +15,5 @@ jobs:
       - name: CI
         uses: agilesyndrome/github-actions@main
         with:
-          makefile_target: ci
+          makefile_target: build
 
