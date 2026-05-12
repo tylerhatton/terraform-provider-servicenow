@@ -1,29 +1,29 @@
+version: "2"
+
 linters:
-  disable-all: true
+  default: none
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
+    - misspell
     - staticcheck
     - unused
+  settings:
+    errcheck:
+      exclude-functions:
+        - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+    paths:
+      - vendor
+
+formatters:
+  enable:
     - gofmt
-    - misspell
-
-linters-settings:
-  errcheck:
-    # Allow ignoring errors from these specific calls that are intentional
-    exclude-functions:
-      - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set
-
-issues:
-  exclude-rules:
-    # Acceptance tests have a lot of long config strings — relax lints there
-    - path: _test\.go
-      linters:
-        - errcheck
-  exclude-dirs:
-    - vendor
 
 run:
   timeout: 5m

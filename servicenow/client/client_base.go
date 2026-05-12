@@ -297,7 +297,7 @@ func (client *Client) doSingleRequest(ctx context.Context, httpClient *http.Clie
 		}
 		return nil, 0, 0, err
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 
 	responseData, err := io.ReadAll(response.Body)
 	if err != nil {
