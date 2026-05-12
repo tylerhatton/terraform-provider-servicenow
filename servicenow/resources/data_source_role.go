@@ -25,7 +25,7 @@ func DataSourceRole() *schema.Resource {
 func readDataSourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := &client.Role{}
-	if err := snowClient.GetObjectByQuery(client.EndpointRole, "suffix="+data.Get(roleSuffix).(string), role); err != nil {
+	if err := snowClient.GetObjectByQuery(ctx, client.EndpointRole, "suffix="+data.Get(roleSuffix).(string), role); err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

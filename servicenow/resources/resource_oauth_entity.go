@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -61,26 +62,25 @@ func ResourceOAuthEntity() *schema.Resource {
 				Description: "Number of seconds the refresh token is good for.",
 			},
 			oauthEntityRedirectURL: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "The OAuth app's endpoint to receive the authorization code.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.Any(validation.StringIsEmpty, validation.IsURLWithScheme([]string{"http", "https"})),
+				Description:  "The OAuth app's endpoint to receive the authorization code.",
 			},
 			oauthEntityLogoURL: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "URL of the logo image to display for the OAuth application.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.Any(validation.StringIsEmpty, validation.IsURLWithScheme([]string{"http", "https"})),
+				Description:  "URL of the logo image to display for the OAuth application.",
 			},
 			oauthEntityAccess: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "public",
-				Description: "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"package_private", "public"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "public",
+				Description:  "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
+				ValidateFunc: validation.StringInSlice([]string{"package_private", "public"}, false),
 			},
 			commonScope: getScopeSchema(),
 		},
@@ -90,7 +90,7 @@ func ResourceOAuthEntity() *schema.Resource {
 func readResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	oauthEntity := &client.OAuthEntity{}
-	if err := snowClient.GetObject(client.EndpointOAuthEntity, data.Id(), oauthEntity); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointOAuthEntity, data.Id(), oauthEntity); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -107,7 +107,7 @@ func readResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, ser
 func createResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	oauthEntity := resourceToOAuthEntity(data)
-	if err := snowClient.CreateObject(client.EndpointOAuthEntity, oauthEntity); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointOAuthEntity, oauthEntity); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -118,7 +118,7 @@ func createResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, s
 
 func updateResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointOAuthEntity, resourceToOAuthEntity(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointOAuthEntity, resourceToOAuthEntity(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -127,7 +127,7 @@ func updateResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, s
 
 func deleteResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointOAuthEntity, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointOAuthEntity, data.Id()))
 }
 
 func resourceFromOAuthEntity(data *schema.ResourceData, oauthEntity *client.OAuthEntity) {

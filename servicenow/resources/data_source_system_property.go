@@ -25,7 +25,7 @@ func DataSourceSystemProperty() *schema.Resource {
 func readDataSourceSystemProperty(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemProperty := &client.SystemProperty{}
-	if err := snowClient.GetObjectByQuery(client.EndpointSystemProperty, "suffix="+data.Get(systemPropertySuffix).(string), systemProperty); err != nil {
+	if err := snowClient.GetObjectByQuery(ctx, client.EndpointSystemProperty, "suffix="+data.Get(systemPropertySuffix).(string), systemProperty); err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -88,42 +89,39 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Type of variable to be used in catalog item.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{
-						"Attachment",
-						"Break",
-						"CheckBox",
-						"Container End",
-						"Container Split",
-						"Container Start",
-						"Custom",
-						"Custom with Label",
-						"Date",
-						"Date/Time",
-						"Duration",
-						"Email",
-						"HTML",
-						"IP Address",
-						"Label",
-						"List Collector",
-						"Lookup Multiple Choice",
-						"Lookup Select Box",
-						"Masked",
-						"Multi Line Text",
-						"Multiple Choice",
-						"Numeric Scale",
-						"Reference",
-						"Requested For",
-						"Rich Text Label",
-						"Select Box",
-						"Single Line Text",
-						"UI Page",
-						"URL",
-						"Wide Single Line Text",
-						"Yes/No",
-					})
-					return
-				},
+				ValidateFunc: validation.StringInSlice([]string{
+					"Attachment",
+					"Break",
+					"CheckBox",
+					"Container End",
+					"Container Split",
+					"Container Start",
+					"Custom",
+					"Custom with Label",
+					"Date",
+					"Date/Time",
+					"Duration",
+					"Email",
+					"HTML",
+					"IP Address",
+					"Label",
+					"List Collector",
+					"Lookup Multiple Choice",
+					"Lookup Select Box",
+					"Masked",
+					"Multi Line Text",
+					"Multiple Choice",
+					"Numeric Scale",
+					"Reference",
+					"Requested For",
+					"Rich Text Label",
+					"Select Box",
+					"Single Line Text",
+					"UI Page",
+					"URL",
+					"Wide Single Line Text",
+					"Yes/No",
+				}, false),
 			},
 			serviceCatalogVariableCatalogItem: {
 				Type:        schema.TypeString,
@@ -205,7 +203,7 @@ func ResourceServiceCatalogVariable() *schema.Resource {
 func readResourceServiceCatalogVariable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogVariable := &client.ServiceCatalogVariable{}
-	if err := snowClient.GetObject(client.EndpointServiceCatalogVariable, data.Id(), serviceCatalogVariable); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointServiceCatalogVariable, data.Id(), serviceCatalogVariable); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -222,7 +220,7 @@ func readResourceServiceCatalogVariable(ctx context.Context, data *schema.Resour
 func createResourceServiceCatalogVariable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogVariable := resourceToServiceCatalogVariable(data)
-	if err := snowClient.CreateObject(client.EndpointServiceCatalogVariable, serviceCatalogVariable); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointServiceCatalogVariable, serviceCatalogVariable); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -233,7 +231,7 @@ func createResourceServiceCatalogVariable(ctx context.Context, data *schema.Reso
 
 func updateResourceServiceCatalogVariable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointServiceCatalogVariable, resourceToServiceCatalogVariable(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointServiceCatalogVariable, resourceToServiceCatalogVariable(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -242,7 +240,7 @@ func updateResourceServiceCatalogVariable(ctx context.Context, data *schema.Reso
 
 func deleteResourceServiceCatalogVariable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointServiceCatalogVariable, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointServiceCatalogVariable, data.Id()))
 }
 
 func resourceFromServiceCatalogVariable(data *schema.ResourceData, serviceCatalogVariable *client.ServiceCatalogVariable) {

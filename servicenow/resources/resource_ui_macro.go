@@ -67,7 +67,7 @@ func ResourceUIMacro() *schema.Resource {
 func readResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiMacro := &client.UIMacro{}
-	if err := snowClient.GetObject(client.EndpointUIMacro, data.Id(), uiMacro); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointUIMacro, data.Id(), uiMacro); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -84,7 +84,7 @@ func readResourceUIMacro(ctx context.Context, data *schema.ResourceData, service
 func createResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiMacro := resourceToUIMacro(data)
-	if err := snowClient.CreateObject(client.EndpointUIMacro, uiMacro); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointUIMacro, uiMacro); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -95,7 +95,7 @@ func createResourceUIMacro(ctx context.Context, data *schema.ResourceData, servi
 
 func updateResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointUIMacro, resourceToUIMacro(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointUIMacro, resourceToUIMacro(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -104,7 +104,7 @@ func updateResourceUIMacro(ctx context.Context, data *schema.ResourceData, servi
 
 func deleteResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIMacro, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointUIMacro, data.Id()))
 }
 
 func resourceFromUIMacro(data *schema.ResourceData, uiMacro *client.UIMacro) {

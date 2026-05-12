@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -29,14 +30,11 @@ func ResourceCSSInclude() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			cssIncludeSource: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "url",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"url", "local"})
-					return
-				},
-				Description: "Source type of the CSS include. Can be 'url' for an external link or 'local' for a service portal style sheet.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "url",
+				ValidateFunc: validation.StringInSlice([]string{"url", "local"}, false),
+				Description:  "Source type of the CSS include. Can be 'url' for an external link or 'local' for a service portal style sheet.",
 			},
 			cssIncludeName: {
 				Type:        schema.TypeString,
@@ -44,10 +42,11 @@ func ResourceCSSInclude() *schema.Resource {
 				Description: "Display name of the CSS include.",
 			},
 			cssIncludeURL: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "URL of the external CSS file when source is set to 'url'.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.Any(validation.StringIsEmpty, validation.IsURLWithScheme([]string{"http", "https"})),
+				Description:  "URL of the external CSS file when source is set to 'url'.",
 			},
 			cssIncludeStyleSheetID: {
 				Type:        schema.TypeString,
@@ -63,7 +62,7 @@ func ResourceCSSInclude() *schema.Resource {
 func readResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssInclude := &client.CSSInclude{}
-	if err := snowClient.GetObject(client.EndpointCSSInclude, data.Id(), cssInclude); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointCSSInclude, data.Id(), cssInclude); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -80,7 +79,7 @@ func readResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serv
 func createResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssInclude := resourceToCSSInclude(data)
-	if err := snowClient.CreateObject(client.EndpointCSSInclude, cssInclude); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointCSSInclude, cssInclude); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -91,7 +90,7 @@ func createResourceCSSInclude(ctx context.Context, data *schema.ResourceData, se
 
 func updateResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointCSSInclude, resourceToCSSInclude(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointCSSInclude, resourceToCSSInclude(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -100,7 +99,7 @@ func updateResourceCSSInclude(ctx context.Context, data *schema.ResourceData, se
 
 func deleteResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointCSSInclude, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointCSSInclude, data.Id()))
 }
 
 func resourceFromCSSInclude(data *schema.ResourceData, cssInclude *client.CSSInclude) {

@@ -84,7 +84,7 @@ func ResourceUIPage() *schema.Resource {
 func readResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiPage := &client.UIPage{}
-	if err := snowClient.GetObject(client.EndpointUIPage, data.Id(), uiPage); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointUIPage, data.Id(), uiPage); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -101,7 +101,7 @@ func readResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceN
 func createResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiPage := resourceToUIPage(data)
-	if err := snowClient.CreateObject(client.EndpointUIPage, uiPage); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointUIPage, uiPage); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -112,7 +112,7 @@ func createResourceUIPage(ctx context.Context, data *schema.ResourceData, servic
 
 func updateResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointUIPage, resourceToUIPage(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointUIPage, resourceToUIPage(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -121,7 +121,7 @@ func updateResourceUIPage(ctx context.Context, data *schema.ResourceData, servic
 
 func deleteResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIPage, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointUIPage, data.Id()))
 }
 
 func resourceFromUIPage(data *schema.ResourceData, page *client.UIPage) {

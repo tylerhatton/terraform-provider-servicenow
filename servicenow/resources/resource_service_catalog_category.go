@@ -94,7 +94,7 @@ func ResourceServiceCatalogCategory() *schema.Resource {
 func readResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogCategory := &client.ServiceCatalogCategory{}
-	if err := snowClient.GetObject(client.EndpointServiceCatalogCategory, data.Id(), serviceCatalogCategory); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointServiceCatalogCategory, data.Id(), serviceCatalogCategory); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -111,7 +111,7 @@ func readResourceServiceCatalogCategory(ctx context.Context, data *schema.Resour
 func createResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogCategory := resourceToServiceCatalogCategory(data)
-	if err := snowClient.CreateObject(client.EndpointServiceCatalogCategory, serviceCatalogCategory); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointServiceCatalogCategory, serviceCatalogCategory); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -122,7 +122,7 @@ func createResourceServiceCatalogCategory(ctx context.Context, data *schema.Reso
 
 func updateResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointServiceCatalogCategory, resourceToServiceCatalogCategory(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointServiceCatalogCategory, resourceToServiceCatalogCategory(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -131,7 +131,7 @@ func updateResourceServiceCatalogCategory(ctx context.Context, data *schema.Reso
 
 func deleteResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointServiceCatalogCategory, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointServiceCatalogCategory, data.Id()))
 }
 
 func resourceFromServiceCatalogCategory(data *schema.ResourceData, serviceCatalogCategory *client.ServiceCatalogCategory) {

@@ -41,7 +41,7 @@ func DataSourceApplicationCategory() *schema.Resource {
 func readResourceApplicationCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationCategory := &client.ApplicationCategory{}
-	if err := snowClient.GetObjectByName(client.EndpointApplicationCategory, data.Get(applicationCategoryName).(string), applicationCategory); err != nil {
+	if err := snowClient.GetObjectByName(ctx, client.EndpointApplicationCategory, data.Get(applicationCategoryName).(string), applicationCategory); err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

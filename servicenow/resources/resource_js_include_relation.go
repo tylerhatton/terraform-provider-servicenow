@@ -51,7 +51,7 @@ func ResourceJsIncludeRelation() *schema.Resource {
 func readResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsIncludeRelation := &client.JsIncludeRelation{}
-	if err := snowClient.GetObject(client.EndpointJsIncludeRelation, data.Id(), jsIncludeRelation); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointJsIncludeRelation, data.Id(), jsIncludeRelation); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -68,7 +68,7 @@ func readResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceDat
 func createResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsIncludeRelation := resourceToJsIncludeRelation(data)
-	if err := snowClient.CreateObject(client.EndpointJsIncludeRelation, jsIncludeRelation); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointJsIncludeRelation, jsIncludeRelation); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -79,7 +79,7 @@ func createResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceD
 
 func updateResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointJsIncludeRelation, resourceToJsIncludeRelation(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointJsIncludeRelation, resourceToJsIncludeRelation(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -88,7 +88,7 @@ func updateResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceD
 
 func deleteResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointJsIncludeRelation, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointJsIncludeRelation, data.Id()))
 }
 
 func resourceFromJsIncludeRelation(data *schema.ResourceData, jsIncludeRelation *client.JsIncludeRelation) {

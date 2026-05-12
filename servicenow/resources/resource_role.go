@@ -66,7 +66,7 @@ func ResourceRole() *schema.Resource {
 func readResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := &client.Role{}
-	if err := snowClient.GetObject(client.EndpointRole, data.Id(), role); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointRole, data.Id(), role); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -83,7 +83,7 @@ func readResourceRole(ctx context.Context, data *schema.ResourceData, serviceNow
 func createResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := resourceToRole(data)
-	if err := snowClient.CreateObject(client.EndpointRole, role); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointRole, role); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -94,7 +94,7 @@ func createResourceRole(ctx context.Context, data *schema.ResourceData, serviceN
 
 func updateResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointRole, resourceToRole(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointRole, resourceToRole(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -103,7 +103,7 @@ func updateResourceRole(ctx context.Context, data *schema.ResourceData, serviceN
 
 func deleteResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointRole, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointRole, data.Id()))
 }
 
 func resourceFromRole(data *schema.ResourceData, role *client.Role) {

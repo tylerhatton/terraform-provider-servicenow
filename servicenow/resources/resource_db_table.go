@@ -2,9 +2,11 @@ package resources
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -36,6 +38,13 @@ func ResourceDBTable() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(10 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Read:   schema.DefaultTimeout(5 * time.Minute),
+			Delete: schema.DefaultTimeout(5 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			dbTableLabel: {
 				Type:        schema.TypeString,
@@ -48,14 +57,11 @@ func ResourceDBTable() *schema.Resource {
 				Description: "Role ID required for end users to access this table.",
 			},
 			dbTableAccess: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "public",
-				Description: "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"package_private", "public"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "public",
+				Description:  "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
+				ValidateFunc: validation.StringInSlice([]string{"package_private", "public"}, false),
 			},
 			dbTableReadAccess: {
 				Type:        schema.TypeBool,
@@ -124,7 +130,7 @@ func ResourceDBTable() *schema.Resource {
 func readResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	dbTable := &client.DBTable{}
-	if err := snowClient.GetObject(client.EndpointDBTable, data.Id(), dbTable); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointDBTable, data.Id(), dbTable); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -141,7 +147,7 @@ func readResourceDBTable(ctx context.Context, data *schema.ResourceData, service
 func createResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	dbTable := resourceToDBTable(data)
-	if err := snowClient.CreateObject(client.EndpointDBTable, dbTable); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointDBTable, dbTable); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -152,7 +158,7 @@ func createResourceDBTable(ctx context.Context, data *schema.ResourceData, servi
 
 func updateResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointDBTable, resourceToDBTable(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointDBTable, resourceToDBTable(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -161,7 +167,7 @@ func updateResourceDBTable(ctx context.Context, data *schema.ResourceData, servi
 
 func deleteResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointDBTable, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointDBTable, data.Id()))
 }
 
 func resourceFromDBTable(data *schema.ResourceData, dbTable *client.DBTable) {

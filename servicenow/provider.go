@@ -1,30 +1,38 @@
 package servicenow
 
 import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/resources"
 )
 
-// Provider is a Terraform Provider to that manages objects in a ServiceNow instance.
+// Provider is a Terraform Provider that manages objects in a ServiceNow instance.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"instance_url": {
-				Type:        schema.TypeString,
-				Description: "The Url of the ServiceNow instance to work with.",
-				Required:    true,
+				Type:         schema.TypeString,
+				Description:  "The URL of the ServiceNow instance to work with. May also be set via the SERVICENOW_INSTANCE_URL environment variable.",
+				Required:     true,
+				DefaultFunc:  schema.EnvDefaultFunc("SERVICENOW_INSTANCE_URL", nil),
+				ValidateFunc: validation.IsURLWithHTTPS,
 			},
 			"username": {
 				Type:        schema.TypeString,
-				Description: "Username used to manage resources in the ServiceNow instance using Basic authentication.",
+				Description: "Username used to manage resources via Basic authentication. May also be set via the SERVICENOW_USERNAME environment variable.",
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc("SERVICENOW_USERNAME", nil),
 			},
 			"password": {
 				Type:        schema.TypeString,
-				Description: "Password of the user to manage resources.",
+				Description: "Password of the user to manage resources. May also be set via the SERVICENOW_PASSWORD environment variable.",
 				Required:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc("SERVICENOW_PASSWORD", nil),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -77,16 +85,31 @@ func Provider() *schema.Provider {
 			"servicenow_system_property":          resources.DataSourceSystemProperty(),
 			"servicenow_system_property_category": resources.DataSourceSystemPropertyCategory(),
 		},
-		ConfigureFunc: configure,
+		ConfigureContextFunc: configure,
 	}
 }
 
-func configure(data *schema.ResourceData) (interface{}, error) {
-	// Create a new client to talk to the instance.
-	client := client.NewClient(
+func configure(_ context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	c := client.NewClient(
 		data.Get("instance_url").(string),
 		data.Get("username").(string),
-		data.Get("password").(string))
+		data.Get("password").(string),
+	)
+	c.UserAgent = "terraform-provider-servicenow/" + providerVersion
+	return c, nil
+}
 
-	return client, nil
+// providerVersion is set from main via SetVersion at startup.
+var providerVersion = "dev"
+
+// SetVersion sets the provider version string used in User-Agent headers.
+func SetVersion(v string) {
+	if v != "" {
+		providerVersion = v
+	}
+}
+
+// Version returns the current provider version.
+func Version() string {
+	return providerVersion
 }

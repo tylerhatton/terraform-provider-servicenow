@@ -1,8 +1,6 @@
 package resources
 
 import (
-	"fmt"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -43,21 +41,4 @@ func setOnlyRequiredSchema(schema map[string]*schema.Schema, requiredName string
 			val.Required = true
 		}
 	}
-}
-
-func validateStringValue(actual string, key string, expectedValues []string) (warns []string, errs []error) {
-	for _, expected := range expectedValues {
-		if actual == expected {
-			return
-		}
-	}
-	var message = ""
-	for i, expected := range expectedValues {
-		if i != 0 {
-			message += " or "
-		}
-		message += "'" + expected + "'"
-	}
-	errs = append(errs, fmt.Errorf("%q must be %s, got: %s", key, message, actual))
-	return
 }

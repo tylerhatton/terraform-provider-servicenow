@@ -2,6 +2,7 @@ package resources
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -35,6 +36,11 @@ func ResourceServiceCatalogItem() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Minute),
+			Update: schema.DefaultTimeout(5 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			serviceCatalogItemName: {
 				Type:        schema.TypeString,
@@ -45,7 +51,7 @@ func ResourceServiceCatalogItem() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
-				Description: "Comma-seperated list of service catalogs the service catalog item is assigned to.",
+				Description: "Comma-separated list of service catalogs the service catalog item is assigned to.",
 			},
 			serviceCatalogItemCategory: {
 				Type:        schema.TypeString,
@@ -115,7 +121,7 @@ func ResourceServiceCatalogItem() *schema.Resource {
 func readResourceServiceCatalogItem(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogItem := &client.ServiceCatalogItem{}
-	if err := snowClient.GetObject(client.EndpointServiceCatalogItem, data.Id(), serviceCatalogItem); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointServiceCatalogItem, data.Id(), serviceCatalogItem); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -132,7 +138,7 @@ func readResourceServiceCatalogItem(ctx context.Context, data *schema.ResourceDa
 func createResourceServiceCatalogItem(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogItem := resourceToServiceCatalogItem(data)
-	if err := snowClient.CreateObject(client.EndpointServiceCatalogItem, serviceCatalogItem); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointServiceCatalogItem, serviceCatalogItem); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -143,7 +149,7 @@ func createResourceServiceCatalogItem(ctx context.Context, data *schema.Resource
 
 func updateResourceServiceCatalogItem(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointServiceCatalogItem, resourceToServiceCatalogItem(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointServiceCatalogItem, resourceToServiceCatalogItem(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -152,7 +158,7 @@ func updateResourceServiceCatalogItem(ctx context.Context, data *schema.Resource
 
 func deleteResourceServiceCatalogItem(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointServiceCatalogItem, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointServiceCatalogItem, data.Id()))
 }
 
 func resourceFromServiceCatalogItem(data *schema.ResourceData, serviceCatalogItem *client.ServiceCatalogItem) {

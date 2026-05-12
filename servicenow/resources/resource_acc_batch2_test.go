@@ -17,6 +17,7 @@ func TestAccRestMessage_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_rest_message"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccRestMessageConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_rest_message.test"),
@@ -24,6 +25,21 @@ func TestAccRestMessage_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("servicenow_rest_message.test", "rest_endpoint", "https://example.com/api"),
 					resource.TestCheckResourceAttr("servicenow_rest_message.test", "description", "TF acceptance test"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (description)
+				Config: providerBlock() + testAccRestMessageConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_rest_message.test"),
+					resource.TestCheckResourceAttr("servicenow_rest_message.test", "name", "tf-acc-rest-message"),
+					resource.TestCheckResourceAttr("servicenow_rest_message.test", "rest_endpoint", "https://example.com/api"),
+					resource.TestCheckResourceAttr("servicenow_rest_message.test", "description", "TF acceptance test updated"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccRestMessageConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_rest_message.test",
@@ -40,6 +56,16 @@ resource "servicenow_rest_message" "test" {
   name          = "tf-acc-rest-message"
   rest_endpoint = "https://example.com/api"
   description   = "TF acceptance test"
+}
+`
+}
+
+func testAccRestMessageConfigUpdated() string {
+	return `
+resource "servicenow_rest_message" "test" {
+  name          = "tf-acc-rest-message"
+  rest_endpoint = "https://example.com/api"
+  description   = "TF acceptance test updated"
 }
 `
 }
@@ -187,13 +213,31 @@ func TestAccScriptedRestApi_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_scripted_rest_api"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccScriptedRestApiConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_scripted_rest_api.test"),
 					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "name", "tf Acc Test API"),
 					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "service_id", "tf_acc_test_api"),
 					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "active", "true"),
+					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "short_description", "TF acceptance test API"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (short_description)
+				Config: providerBlock() + testAccScriptedRestApiConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_scripted_rest_api.test"),
+					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "name", "tf Acc Test API"),
+					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "service_id", "tf_acc_test_api"),
+					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "active", "true"),
+					resource.TestCheckResourceAttr("servicenow_scripted_rest_api.test", "short_description", "TF acceptance test API updated"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccScriptedRestApiConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_scripted_rest_api.test",
@@ -207,9 +251,21 @@ func TestAccScriptedRestApi_basic(t *testing.T) {
 func testAccScriptedRestApiConfig() string {
 	return `
 resource "servicenow_scripted_rest_api" "test" {
-  name       = "tf Acc Test API"
-  service_id = "tf_acc_test_api"
-  active     = true
+  name              = "tf Acc Test API"
+  service_id        = "tf_acc_test_api"
+  active            = true
+  short_description = "TF acceptance test API"
+}
+`
+}
+
+func testAccScriptedRestApiConfigUpdated() string {
+	return `
+resource "servicenow_scripted_rest_api" "test" {
+  name              = "tf Acc Test API"
+  service_id        = "tf_acc_test_api"
+  active            = true
+  short_description = "TF acceptance test API updated"
 }
 `
 }
@@ -235,9 +291,9 @@ func TestAccScriptedRestResource_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      "servicenow_scripted_rest_resource.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "servicenow_scripted_rest_resource.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"operation_script"},
 			},
 		},
@@ -314,6 +370,7 @@ func TestAccServiceCatalog_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_service_catalog"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccServiceCatalogConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_service_catalog.test"),
@@ -321,6 +378,21 @@ func TestAccServiceCatalog_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("servicenow_service_catalog.test", "description", "Created by Terraform acceptance tests"),
 					resource.TestCheckResourceAttr("servicenow_service_catalog.test", "active", "true"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (description)
+				Config: providerBlock() + testAccServiceCatalogConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_service_catalog.test"),
+					resource.TestCheckResourceAttr("servicenow_service_catalog.test", "title", "TF Acc Test Catalog"),
+					resource.TestCheckResourceAttr("servicenow_service_catalog.test", "description", "Updated by Terraform acceptance tests"),
+					resource.TestCheckResourceAttr("servicenow_service_catalog.test", "active", "true"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccServiceCatalogConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_service_catalog.test",
@@ -336,6 +408,16 @@ func testAccServiceCatalogConfig() string {
 resource "servicenow_service_catalog" "test" {
   title       = "TF Acc Test Catalog"
   description = "Created by Terraform acceptance tests"
+  active      = true
+}
+`
+}
+
+func testAccServiceCatalogConfigUpdated() string {
+	return `
+resource "servicenow_service_catalog" "test" {
+  title       = "TF Acc Test Catalog"
+  description = "Updated by Terraform acceptance tests"
   active      = true
 }
 `

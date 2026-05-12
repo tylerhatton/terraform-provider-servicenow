@@ -177,7 +177,7 @@ func ResourceServer() *schema.Resource {
 func readResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	server := &client.Server{}
-	if err := snowClient.GetObject(client.EndpointServer, data.Id(), server); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointServer, data.Id(), server); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -194,7 +194,7 @@ func readResourceServer(ctx context.Context, data *schema.ResourceData, serviceN
 func createResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	server := resourceToServer(data)
-	if err := snowClient.CreateObject(client.EndpointServer, server); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointServer, server); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -205,7 +205,7 @@ func createResourceServer(ctx context.Context, data *schema.ResourceData, servic
 
 func updateResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointServer, resourceToServer(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointServer, resourceToServer(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -214,7 +214,7 @@ func updateResourceServer(ctx context.Context, data *schema.ResourceData, servic
 
 func deleteResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointServer, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointServer, data.Id()))
 }
 
 func resourceFromServer(data *schema.ResourceData, server *client.Server) {

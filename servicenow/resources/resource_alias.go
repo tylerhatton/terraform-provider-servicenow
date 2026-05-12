@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -43,32 +44,18 @@ func ResourceAlias() *schema.Resource {
 				Description: "Sys id of parent alias",
 			},
 			aliasType: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "credential",
-				Description: "Type of alias. credential or connection",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{
-						"connection",
-						"credential",
-					})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "credential",
+				Description:  "Type of alias. credential or connection",
+				ValidateFunc: validation.StringInSlice([]string{"connection", "credential"}, false),
 			},
 			aliasConnectionType: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "http_connection",
-				Description: "Type of connection. http_connection, jdbc_connection, basic_connection, or jms_connection",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{
-						"http_connection",
-						"jdbc_connection",
-						"basic_connection",
-						"jms_connection",
-					})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "http_connection",
+				Description:  "Type of connection. http_connection, jdbc_connection, basic_connection, or jms_connection",
+				ValidateFunc: validation.StringInSlice([]string{"http_connection", "jdbc_connection", "basic_connection", "jms_connection"}, false),
 			},
 			aliasMultipleActions: {
 				Type:        schema.TypeBool,
@@ -96,7 +83,7 @@ func ResourceAlias() *schema.Resource {
 func readResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	alias := &client.Alias{}
-	if err := snowClient.GetObject(client.EndpointAlias, data.Id(), alias); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointAlias, data.Id(), alias); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -113,7 +100,7 @@ func readResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNo
 func createResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	alias := resourceToAlias(data)
-	if err := snowClient.CreateObject(client.EndpointAlias, alias); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointAlias, alias); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -124,7 +111,7 @@ func createResourceAlias(ctx context.Context, data *schema.ResourceData, service
 
 func updateResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointAlias, resourceToAlias(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointAlias, resourceToAlias(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -133,7 +120,7 @@ func updateResourceAlias(ctx context.Context, data *schema.ResourceData, service
 
 func deleteResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointAlias, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointAlias, data.Id()))
 }
 
 func resourceFromAlias(data *schema.ResourceData, alias *client.Alias) {

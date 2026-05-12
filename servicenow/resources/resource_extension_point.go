@@ -65,7 +65,7 @@ func ResourceExtensionPoint() *schema.Resource {
 func readResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	extensionPoint := &client.ExtensionPoint{}
-	if err := snowClient.GetObject(client.EndpointExtensionPoint, data.Id(), extensionPoint); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointExtensionPoint, data.Id(), extensionPoint); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -82,7 +82,7 @@ func readResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, 
 func createResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	extensionPoint := resourceToExtensionPoint(data)
-	if err := snowClient.CreateObject(client.EndpointExtensionPoint, extensionPoint); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointExtensionPoint, extensionPoint); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -93,7 +93,7 @@ func createResourceExtensionPoint(ctx context.Context, data *schema.ResourceData
 
 func updateResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointExtensionPoint, resourceToExtensionPoint(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointExtensionPoint, resourceToExtensionPoint(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -102,7 +102,7 @@ func updateResourceExtensionPoint(ctx context.Context, data *schema.ResourceData
 
 func deleteResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointExtensionPoint, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointExtensionPoint, data.Id()))
 }
 
 func resourceFromExtensionPoint(data *schema.ResourceData, extensionPoint *client.ExtensionPoint) {

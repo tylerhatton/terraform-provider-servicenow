@@ -24,7 +24,7 @@ func DataSourceServiceCatalog() *schema.Resource {
 func readDataSourceServiceCatalog(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalog := &client.ServiceCatalog{}
-	if err := snowClient.GetObjectByTitle(client.EndpointServiceCatalog, data.Get(serviceCatalogTitle).(string), serviceCatalog); err != nil {
+	if err := snowClient.GetObjectByTitle(ctx, client.EndpointServiceCatalog, data.Get(serviceCatalogTitle).(string), serviceCatalog); err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

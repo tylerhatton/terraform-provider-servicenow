@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -12,7 +13,6 @@ const restMethodName = "name"
 const restMethodMessageID = "rest_message_id"
 const restMethodHTTPMethod = "http_method"
 const restMethodRestEndpoint = "rest_endpoint"
-const restMethodAuthenticationType = "authentication_type"
 const restMethodQualifiedName = "qualified_name"
 
 // ResourceRestMethod is holding the info about a REST method to be included in a REST message.
@@ -41,13 +41,10 @@ func ResourceRestMethod() *schema.Resource {
 				Description: "The REST message record ID this method is based on.",
 			},
 			restMethodHTTPMethod: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The HTTP method this record implements. Can be 'get', 'post', 'put', 'patch' or 'delete'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"get", "post", "put", "patch", "delete"})
-					return
-				},
+				Type:         schema.TypeString,
+				Required:     true,
+				Description:  "The HTTP method this record implements. Can be 'get', 'post', 'put', 'patch' or 'delete'.",
+				ValidateFunc: validation.StringInSlice([]string{"get", "post", "put", "patch", "delete"}, false),
 			},
 			restMethodRestEndpoint: {
 				Type:        schema.TypeString,
@@ -68,7 +65,7 @@ func ResourceRestMethod() *schema.Resource {
 func readResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethod := &client.RestMethod{}
-	if err := snowClient.GetObject(client.EndpointRestMethod, data.Id(), restMethod); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointRestMethod, data.Id(), restMethod); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -85,7 +82,7 @@ func readResourceRestMethod(ctx context.Context, data *schema.ResourceData, serv
 func createResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethod := resourceToRestMethod(data)
-	if err := snowClient.CreateObject(client.EndpointRestMethod, restMethod); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointRestMethod, restMethod); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -96,7 +93,7 @@ func createResourceRestMethod(ctx context.Context, data *schema.ResourceData, se
 
 func updateResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointRestMethod, resourceToRestMethod(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointRestMethod, resourceToRestMethod(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -105,7 +102,7 @@ func updateResourceRestMethod(ctx context.Context, data *schema.ResourceData, se
 
 func deleteResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMethod, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointRestMethod, data.Id()))
 }
 
 func resourceFromRestMethod(data *schema.ResourceData, restMethod *client.RestMethod) {

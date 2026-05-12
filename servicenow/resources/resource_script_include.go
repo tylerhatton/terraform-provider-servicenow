@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -60,14 +61,11 @@ func ResourceScriptInclude() *schema.Resource {
 				Description: "Whether or not this Script Include is enabled.",
 			},
 			scriptIncludeAccess: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "package_private",
-				Description: "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"package_private", "public"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "package_private",
+				Description:  "Whether this Script can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
+				ValidateFunc: validation.StringInSlice([]string{"package_private", "public"}, false),
 			},
 			scriptIncludeAPIName: {
 				Type:        schema.TypeString,
@@ -83,7 +81,7 @@ func ResourceScriptInclude() *schema.Resource {
 func readResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptInclude := &client.ScriptInclude{}
-	if err := snowClient.GetObject(client.EndpointScriptInclude, data.Id(), scriptInclude); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointScriptInclude, data.Id(), scriptInclude); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -100,7 +98,7 @@ func readResourceScriptInclude(ctx context.Context, data *schema.ResourceData, s
 func createResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptInclude := resourceToScriptInclude(data)
-	if err := snowClient.CreateObject(client.EndpointScriptInclude, scriptInclude); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointScriptInclude, scriptInclude); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -111,7 +109,7 @@ func createResourceScriptInclude(ctx context.Context, data *schema.ResourceData,
 
 func updateResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointScriptInclude, resourceToScriptInclude(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointScriptInclude, resourceToScriptInclude(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -120,7 +118,7 @@ func updateResourceScriptInclude(ctx context.Context, data *schema.ResourceData,
 
 func deleteResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointScriptInclude, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointScriptInclude, data.Id()))
 }
 
 func resourceFromScriptInclude(data *schema.ResourceData, scriptInclude *client.ScriptInclude) {

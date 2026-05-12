@@ -102,9 +102,9 @@ func readDataSourceACL(ctx context.Context, data *schema.ResourceData, serviceNo
 		if aclTypeVal != "" {
 			query += "^type=" + aclTypeVal
 		}
-		err = snowClient.GetObjectByQuery(client.EndpointACL, query, acl)
+		err = snowClient.GetObjectByQuery(ctx, client.EndpointACL, query, acl)
 	} else {
-		err = snowClient.GetObjectByName(client.EndpointACL, name, acl)
+		err = snowClient.GetObjectByName(ctx, client.EndpointACL, name, acl)
 	}
 	if err != nil {
 		data.SetId("")

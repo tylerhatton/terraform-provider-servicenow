@@ -65,7 +65,7 @@ func ResourceBasicAuthCredential() *schema.Resource {
 func readResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	basicAuthCredential := &client.BasicAuthCredential{}
-	if err := snowClient.GetObject(client.EndpointBasicAuthCredential, data.Id(), basicAuthCredential); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointBasicAuthCredential, data.Id(), basicAuthCredential); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -82,7 +82,7 @@ func readResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceD
 func createResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	basicAuthCredential := resourceToBasicAuthCredential(data)
-	if err := snowClient.CreateObject(client.EndpointBasicAuthCredential, basicAuthCredential); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointBasicAuthCredential, basicAuthCredential); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -93,7 +93,7 @@ func createResourceBasicAuthCredential(ctx context.Context, data *schema.Resourc
 
 func updateResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointBasicAuthCredential, resourceToBasicAuthCredential(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointBasicAuthCredential, resourceToBasicAuthCredential(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -102,7 +102,7 @@ func updateResourceBasicAuthCredential(ctx context.Context, data *schema.Resourc
 
 func deleteResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointBasicAuthCredential, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointBasicAuthCredential, data.Id()))
 }
 
 func resourceFromBasicAuthCredential(data *schema.ResourceData, basicAuthCredential *client.BasicAuthCredential) {

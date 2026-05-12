@@ -18,37 +18,37 @@ type ClientMock struct {
 	mock.Mock
 }
 
-func (m *ClientMock) GetObject(endpoint string, id string, responseObjectOut client.Record) error {
+func (m *ClientMock) GetObject(_ context.Context, endpoint string, id string, responseObjectOut client.Record) error {
 	args := m.Called(endpoint, id, responseObjectOut)
 	return args.Error(0)
 }
 
-func (m *ClientMock) GetObjectByName(endpoint string, name string, responseObjectOut client.Record) error {
+func (m *ClientMock) GetObjectByName(_ context.Context, endpoint string, name string, responseObjectOut client.Record) error {
 	args := m.Called(endpoint, name, responseObjectOut)
 	return args.Error(0)
 }
 
-func (m *ClientMock) GetObjectByTitle(endpoint string, title string, responseObjectOut client.Record) error {
+func (m *ClientMock) GetObjectByTitle(_ context.Context, endpoint string, title string, responseObjectOut client.Record) error {
 	args := m.Called(endpoint, title, responseObjectOut)
 	return args.Error(0)
 }
 
-func (m *ClientMock) GetObjectByQuery(endpoint string, query string, responseObjectOut client.Record) error {
+func (m *ClientMock) GetObjectByQuery(_ context.Context, endpoint string, query string, responseObjectOut client.Record) error {
 	args := m.Called(endpoint, query, responseObjectOut)
 	return args.Error(0)
 }
 
-func (m *ClientMock) CreateObject(endpoint string, record client.Record) error {
+func (m *ClientMock) CreateObject(_ context.Context, endpoint string, record client.Record) error {
 	args := m.Called(endpoint, record)
 	return args.Error(0)
 }
 
-func (m *ClientMock) UpdateObject(endpoint string, record client.Record) error {
+func (m *ClientMock) UpdateObject(_ context.Context, endpoint string, record client.Record) error {
 	args := m.Called(endpoint, record)
 	return args.Error(0)
 }
 
-func (m *ClientMock) DeleteObject(endpoint string, id string) error {
+func (m *ClientMock) DeleteObject(_ context.Context, endpoint string, id string) error {
 	args := m.Called(endpoint, id)
 	return args.Error(0)
 }
@@ -80,45 +80,28 @@ func (m *RecordMock) GetError() *client.ErrorDetail {
 	return nil
 }
 
-// callRead invokes ReadContext if set, otherwise falls back to Read.
-// Returns true if any diagnostics have errors (or the error return is non-nil).
+// callRead invokes ReadContext and reports whether diagnostics contain errors.
 func callRead(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
-	if res.ReadContext != nil {
-		diags := res.ReadContext(context.Background(), data, meta)
-		return diags.HasError()
-	}
-	err := res.Read(data, meta)
-	return err != nil
+	diags := res.ReadContext(context.Background(), data, meta)
+	return diags.HasError()
 }
 
-// callCreate invokes CreateContext if set, otherwise falls back to Create.
+// callCreate invokes CreateContext and reports whether diagnostics contain errors.
 func callCreate(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
-	if res.CreateContext != nil {
-		diags := res.CreateContext(context.Background(), data, meta)
-		return diags.HasError()
-	}
-	err := res.Create(data, meta)
-	return err != nil
+	diags := res.CreateContext(context.Background(), data, meta)
+	return diags.HasError()
 }
 
-// callUpdate invokes UpdateContext if set, otherwise falls back to Update.
+// callUpdate invokes UpdateContext and returns (hasError, diagnostics).
 func callUpdate(res *schema.Resource, data *schema.ResourceData, meta interface{}) (bool, diag.Diagnostics) {
-	if res.UpdateContext != nil {
-		diags := res.UpdateContext(context.Background(), data, meta)
-		return diags.HasError(), diags
-	}
-	err := res.Update(data, meta)
-	return err != nil, nil
+	diags := res.UpdateContext(context.Background(), data, meta)
+	return diags.HasError(), diags
 }
 
-// callDelete invokes DeleteContext if set, otherwise falls back to Delete.
+// callDelete invokes DeleteContext and reports whether diagnostics contain errors.
 func callDelete(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
-	if res.DeleteContext != nil {
-		diags := res.DeleteContext(context.Background(), data, meta)
-		return diags.HasError()
-	}
-	err := res.Delete(data, meta)
-	return err != nil
+	diags := res.DeleteContext(context.Background(), data, meta)
+	return diags.HasError()
 }
 
 var resourcesToTest = []*schema.Resource{

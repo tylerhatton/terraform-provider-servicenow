@@ -79,7 +79,7 @@ func ResourceQuestionChoice() *schema.Resource {
 func readResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	questionChoice := &client.QuestionChoice{}
-	if err := snowClient.GetObject(client.EndpointQuestionChoice, data.Id(), questionChoice); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointQuestionChoice, data.Id(), questionChoice); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -96,7 +96,7 @@ func readResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, 
 func createResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	questionChoice := resourceToQuestionChoice(data)
-	if err := snowClient.CreateObject(client.EndpointQuestionChoice, questionChoice); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointQuestionChoice, questionChoice); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -107,7 +107,7 @@ func createResourceQuestionChoice(ctx context.Context, data *schema.ResourceData
 
 func updateResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointQuestionChoice, resourceToQuestionChoice(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointQuestionChoice, resourceToQuestionChoice(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -116,7 +116,7 @@ func updateResourceQuestionChoice(ctx context.Context, data *schema.ResourceData
 
 func deleteResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointQuestionChoice, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointQuestionChoice, data.Id()))
 }
 
 func resourceFromQuestionChoice(data *schema.ResourceData, questionChoice *client.QuestionChoice) {

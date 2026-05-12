@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -12,7 +13,6 @@ const restMessageName = "name"
 const restMessageDescription = "description"
 const restMessageRestEndpoint = "rest_endpoint"
 const restMessageAccess = "access"
-const restMessageAuthenticationType = "authentication_type" // No auth is supported
 
 // ResourceRestMessage is holding the info about a REST message configuration to be included.
 func ResourceRestMessage() *schema.Resource {
@@ -35,9 +35,10 @@ func ResourceRestMessage() *schema.Resource {
 				Description: "Descriptive name for this REST message.",
 			},
 			restMessageRestEndpoint: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The URL of the REST web service provider this REST message sends requests to.  Can contain variables in the format '${variable}'.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithScheme([]string{"http", "https"}),
+				Description:  "The URL of the REST web service provider this REST message sends requests to.  Can contain variables in the format '${variable}'.",
 			},
 			restMessageDescription: {
 				Type:        schema.TypeString,
@@ -46,14 +47,11 @@ func ResourceRestMessage() *schema.Resource {
 				Description: "Description for this REST message.",
 			},
 			restMessageAccess: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "package_private",
-				Description: "Whether this REST message can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"package_private", "public"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "package_private",
+				Description:  "Whether this REST message can be accessed from only this application scope or all application scopes. Values can be 'package_private' or 'public'.",
+				ValidateFunc: validation.StringInSlice([]string{"package_private", "public"}, false),
 			},
 			commonScope: getScopeSchema(),
 		},
@@ -63,7 +61,7 @@ func ResourceRestMessage() *schema.Resource {
 func readResourceRestMessage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMessage := &client.RestMessage{}
-	if err := snowClient.GetObject(client.EndpointRestMessage, data.Id(), restMessage); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointRestMessage, data.Id(), restMessage); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -80,7 +78,7 @@ func readResourceRestMessage(ctx context.Context, data *schema.ResourceData, ser
 func createResourceRestMessage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMessage := resourceToRestMessage(data)
-	if err := snowClient.CreateObject(client.EndpointRestMessage, restMessage); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointRestMessage, restMessage); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -91,7 +89,7 @@ func createResourceRestMessage(ctx context.Context, data *schema.ResourceData, s
 
 func updateResourceRestMessage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointRestMessage, resourceToRestMessage(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointRestMessage, resourceToRestMessage(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -100,7 +98,7 @@ func updateResourceRestMessage(ctx context.Context, data *schema.ResourceData, s
 
 func deleteResourceRestMessage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMessage, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointRestMessage, data.Id()))
 }
 
 func resourceFromRestMessage(data *schema.ResourceData, restMessage *client.RestMessage) {

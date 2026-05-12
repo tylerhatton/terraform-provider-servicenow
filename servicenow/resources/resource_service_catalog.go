@@ -49,7 +49,7 @@ func ResourceServiceCatalog() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
-				Description: "Comma-seperated list of sys ids of editor users capable of editing and updating catalog categories and items.",
+				Description: "Comma-separated list of sys ids of editor users capable of editing and updating catalog categories and items.",
 			},
 			serviceCatalogDescription: {
 				Type:        schema.TypeString,
@@ -61,7 +61,7 @@ func ResourceServiceCatalog() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Background color of service catalog in hexidecimal format.",
+				Description: "Background color of service catalog in hexadecimal format.",
 			},
 			serviceCatalogDesktopImage: {
 				Type:        schema.TypeString,
@@ -101,7 +101,7 @@ func ResourceServiceCatalog() *schema.Resource {
 func readResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalog := &client.ServiceCatalog{}
-	if err := snowClient.GetObject(client.EndpointServiceCatalog, data.Id(), serviceCatalog); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointServiceCatalog, data.Id(), serviceCatalog); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -118,7 +118,7 @@ func readResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, 
 func createResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalog := resourceToServiceCatalog(data)
-	if err := snowClient.CreateObject(client.EndpointServiceCatalog, serviceCatalog); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointServiceCatalog, serviceCatalog); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -129,7 +129,7 @@ func createResourceServiceCatalog(ctx context.Context, data *schema.ResourceData
 
 func updateResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointServiceCatalog, resourceToServiceCatalog(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointServiceCatalog, resourceToServiceCatalog(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -138,7 +138,7 @@ func updateResourceServiceCatalog(ctx context.Context, data *schema.ResourceData
 
 func deleteResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointServiceCatalog, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointServiceCatalog, data.Id()))
 }
 
 func resourceFromServiceCatalog(data *schema.ResourceData, serviceCatalog *client.ServiceCatalog) {

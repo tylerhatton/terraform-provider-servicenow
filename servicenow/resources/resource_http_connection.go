@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -55,9 +56,10 @@ func ResourceHttpConnection() *schema.Resource {
 				Description: "Sys ID of associated connection alias configuration.",
 			},
 			httpConnectionConnectionUrl: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Base URL of HTTP connection configuration.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.IsURLWithScheme([]string{"http", "https"}),
+				Description:  "Base URL of HTTP connection configuration.",
 			},
 			httpConnectionUseMidServer: {
 				Type:        schema.TypeBool,
@@ -66,17 +68,11 @@ func ResourceHttpConnection() *schema.Resource {
 				Description: "If true, the HTTP connection server will use a mid server.",
 			},
 			httpConnectionMidSelection: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "auto_select",
-				Description: "Decides which mid server is used. auto_select or specific_mid_server",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{
-						"auto_select",
-						"specific_mid_server",
-					})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "auto_select",
+				Description:  "Decides which mid server is used. auto_select or specific_mid_server",
+				ValidateFunc: validation.StringInSlice([]string{"auto_select", "specific_mid_server"}, false),
 			},
 			httpConnectionMidServer: {
 				Type:        schema.TypeString,
@@ -91,7 +87,7 @@ func ResourceHttpConnection() *schema.Resource {
 func readResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	httpConnection := &client.HttpConnection{}
-	if err := snowClient.GetObject(client.EndpointHttpConnection, data.Id(), httpConnection); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointHttpConnection, data.Id(), httpConnection); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -108,7 +104,7 @@ func readResourceHttpConnection(ctx context.Context, data *schema.ResourceData, 
 func createResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	httpConnection := resourceToHttpConnection(data)
-	if err := snowClient.CreateObject(client.EndpointHttpConnection, httpConnection); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointHttpConnection, httpConnection); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -119,7 +115,7 @@ func createResourceHttpConnection(ctx context.Context, data *schema.ResourceData
 
 func updateResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointHttpConnection, resourceToHttpConnection(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointHttpConnection, resourceToHttpConnection(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -128,7 +124,7 @@ func updateResourceHttpConnection(ctx context.Context, data *schema.ResourceData
 
 func deleteResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointHttpConnection, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointHttpConnection, data.Id()))
 }
 
 func resourceFromHttpConnection(data *schema.ResourceData, httpConnection *client.HttpConnection) {

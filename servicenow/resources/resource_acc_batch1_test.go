@@ -17,12 +17,27 @@ func TestAccAlias_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_alias"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccAliasConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_alias.test"),
 					resource.TestCheckResourceAttr("servicenow_alias.test", "name", "tf-acc-alias"),
 					resource.TestCheckResourceAttr("servicenow_alias.test", "type", "credential"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (name)
+				Config: providerBlock() + testAccAliasConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_alias.test"),
+					resource.TestCheckResourceAttr("servicenow_alias.test", "name", "tf-acc-alias-renamed"),
+					resource.TestCheckResourceAttr("servicenow_alias.test", "type", "credential"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccAliasConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_alias.test",
@@ -42,6 +57,15 @@ resource "servicenow_alias" "test" {
 `
 }
 
+func testAccAliasConfigUpdated() string {
+	return `
+resource "servicenow_alias" "test" {
+  name = "tf-acc-alias-renamed"
+  type = "credential"
+}
+`
+}
+
 // ---------------------------------------------------------------------------
 // servicenow_application
 // ---------------------------------------------------------------------------
@@ -53,6 +77,7 @@ func TestAccApplication_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_application"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccApplicationConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_application.test"),
@@ -60,6 +85,21 @@ func TestAccApplication_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("servicenow_application.test", "scope", "x_tfacc_test"),
 					resource.TestCheckResourceAttr("servicenow_application.test", "version", "1.0.0"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (version)
+				Config: providerBlock() + testAccApplicationConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_application.test"),
+					resource.TestCheckResourceAttr("servicenow_application.test", "name", "TF Acc Test App"),
+					resource.TestCheckResourceAttr("servicenow_application.test", "scope", "x_tfacc_test"),
+					resource.TestCheckResourceAttr("servicenow_application.test", "version", "1.1.0"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccApplicationConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_application.test",
@@ -76,6 +116,16 @@ resource "servicenow_application" "test" {
   name    = "TF Acc Test App"
   scope   = "x_tfacc_test"
   version = "1.0.0"
+}
+`
+}
+
+func testAccApplicationConfigUpdated() string {
+	return `
+resource "servicenow_application" "test" {
+  name    = "TF Acc Test App"
+  scope   = "x_tfacc_test"
+  version = "1.1.0"
 }
 `
 }
@@ -136,11 +186,27 @@ func TestAccRole_basic(t *testing.T) {
 		CheckDestroy:      checkDestroy("servicenow_role"),
 		Steps: []resource.TestStep{
 			{
+				// Create
 				Config: providerBlock() + testAccRoleConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_role.test"),
 					resource.TestCheckResourceAttr("servicenow_role.test", "suffix", "tf_acc_test_role"),
+					resource.TestCheckResourceAttr("servicenow_role.test", "description", "TF acceptance test role"),
 				),
+			},
+			{
+				// Update - change non-ForceNew field (description)
+				Config: providerBlock() + testAccRoleConfigUpdated(),
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_role.test"),
+					resource.TestCheckResourceAttr("servicenow_role.test", "suffix", "tf_acc_test_role"),
+					resource.TestCheckResourceAttr("servicenow_role.test", "description", "TF acceptance test role updated"),
+				),
+			},
+			{
+				// PlanOnly - verify no drift after refresh
+				Config:   providerBlock() + testAccRoleConfigUpdated(),
+				PlanOnly: true,
 			},
 			{
 				ResourceName:      "servicenow_role.test",
@@ -154,7 +220,17 @@ func TestAccRole_basic(t *testing.T) {
 func testAccRoleConfig() string {
 	return `
 resource "servicenow_role" "test" {
-  suffix = "tf_acc_test_role"
+  suffix      = "tf_acc_test_role"
+  description = "TF acceptance test role"
+}
+`
+}
+
+func testAccRoleConfigUpdated() string {
+	return `
+resource "servicenow_role" "test" {
+  suffix      = "tf_acc_test_role"
+  description = "TF acceptance test role updated"
 }
 `
 }

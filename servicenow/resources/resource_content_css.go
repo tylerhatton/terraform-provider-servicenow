@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -34,20 +35,18 @@ func ResourceContentCSS() *schema.Resource {
 				Description: "Display name of the content management style sheet.",
 			},
 			contentCSSType: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "local",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"link", "local"})
-					return
-				},
-				Description: "The type of this content management style sheet. Can be 'link' or 'local'.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "local",
+				ValidateFunc: validation.StringInSlice([]string{"link", "local"}, false),
+				Description:  "The type of this content management style sheet. Can be 'link' or 'local'.",
 			},
 			contentCSSUrl: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "Used when 'type' is set to 'link'. Must be an absolute URL to an external style sheet file.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.Any(validation.StringIsEmpty, validation.IsURLWithScheme([]string{"http", "https"})),
+				Description:  "Used when 'type' is set to 'link'. Must be an absolute URL to an external style sheet file.",
 			},
 			contentCSSStyle: {
 				Type:        schema.TypeString,
@@ -63,7 +62,7 @@ func ResourceContentCSS() *schema.Resource {
 func readResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	contentCSS := &client.ContentCSS{}
-	if err := snowClient.GetObject(client.EndpointContentCSS, data.Id(), contentCSS); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointContentCSS, data.Id(), contentCSS); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -80,7 +79,7 @@ func readResourceContentCSS(ctx context.Context, data *schema.ResourceData, serv
 func createResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	contentCSS := resourceToContentCSS(data)
-	if err := snowClient.CreateObject(client.EndpointContentCSS, contentCSS); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointContentCSS, contentCSS); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -91,7 +90,7 @@ func createResourceContentCSS(ctx context.Context, data *schema.ResourceData, se
 
 func updateResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointContentCSS, resourceToContentCSS(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointContentCSS, resourceToContentCSS(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -100,7 +99,7 @@ func updateResourceContentCSS(ctx context.Context, data *schema.ResourceData, se
 
 func deleteResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointContentCSS, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointContentCSS, data.Id()))
 }
 
 func resourceFromContentCSS(data *schema.ResourceData, contentCSS *client.ContentCSS) {

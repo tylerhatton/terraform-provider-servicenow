@@ -50,7 +50,7 @@ func ResourceRestMethodHeader() *schema.Resource {
 func readResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethodHeader := &client.RestMethodHeader{}
-	if err := snowClient.GetObject(client.EndpointRestMethodHeader, data.Id(), restMethodHeader); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointRestMethodHeader, data.Id(), restMethodHeader); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -67,7 +67,7 @@ func readResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData
 func createResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethodHeader := resourceToRestMethodHeader(data)
-	if err := snowClient.CreateObject(client.EndpointRestMethodHeader, restMethodHeader); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointRestMethodHeader, restMethodHeader); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -78,7 +78,7 @@ func createResourceRestMethodHeader(ctx context.Context, data *schema.ResourceDa
 
 func updateResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointRestMethodHeader, resourceToRestMethodHeader(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointRestMethodHeader, resourceToRestMethodHeader(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -87,7 +87,7 @@ func updateResourceRestMethodHeader(ctx context.Context, data *schema.ResourceDa
 
 func deleteResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMethodHeader, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointRestMethodHeader, data.Id()))
 }
 
 func resourceFromRestMethodHeader(data *schema.ResourceData, restMethodHeader *client.RestMethodHeader) {

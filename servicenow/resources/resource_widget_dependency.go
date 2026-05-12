@@ -52,7 +52,7 @@ func ResourceWidgetDependency() *schema.Resource {
 func readResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widgetDependency := &client.WidgetDependency{}
-	if err := snowClient.GetObject(client.EndpointWidgetDependency, data.Id(), widgetDependency); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointWidgetDependency, data.Id(), widgetDependency); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -69,7 +69,7 @@ func readResourceWidgetDependency(ctx context.Context, data *schema.ResourceData
 func createResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widgetDependency := resourceToWidgetDependency(data)
-	if err := snowClient.CreateObject(client.EndpointWidgetDependency, widgetDependency); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointWidgetDependency, widgetDependency); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -80,7 +80,7 @@ func createResourceWidgetDependency(ctx context.Context, data *schema.ResourceDa
 
 func updateResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointWidgetDependency, resourceToWidgetDependency(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointWidgetDependency, resourceToWidgetDependency(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -89,7 +89,7 @@ func updateResourceWidgetDependency(ctx context.Context, data *schema.ResourceDa
 
 func deleteResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointWidgetDependency, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointWidgetDependency, data.Id()))
 }
 
 func resourceFromWidgetDependency(data *schema.ResourceData, widgetDependency *client.WidgetDependency) {

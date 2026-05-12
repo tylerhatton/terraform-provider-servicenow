@@ -51,7 +51,7 @@ func ResourceCSSIncludeRelation() *schema.Resource {
 func readResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssIncludeRelation := &client.CSSIncludeRelation{}
-	if err := snowClient.GetObject(client.EndpointCSSIncludeRelation, data.Id(), cssIncludeRelation); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointCSSIncludeRelation, data.Id(), cssIncludeRelation); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -68,7 +68,7 @@ func readResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceDa
 func createResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssIncludeRelation := resourceToCSSIncludeRelation(data)
-	if err := snowClient.CreateObject(client.EndpointCSSIncludeRelation, cssIncludeRelation); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointCSSIncludeRelation, cssIncludeRelation); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -79,7 +79,7 @@ func createResourceCSSIncludeRelation(ctx context.Context, data *schema.Resource
 
 func updateResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointCSSIncludeRelation, resourceToCSSIncludeRelation(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointCSSIncludeRelation, resourceToCSSIncludeRelation(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -88,7 +88,7 @@ func updateResourceCSSIncludeRelation(ctx context.Context, data *schema.Resource
 
 func deleteResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointCSSIncludeRelation, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointCSSIncludeRelation, data.Id()))
 }
 
 func resourceFromCSSIncludeRelation(data *schema.ResourceData, cssIncludeRelation *client.CSSIncludeRelation) {

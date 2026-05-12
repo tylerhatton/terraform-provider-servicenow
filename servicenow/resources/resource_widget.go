@@ -135,7 +135,7 @@ func ResourceWidget() *schema.Resource {
 func readResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widget := &client.Widget{}
-	if err := snowClient.GetObject(client.EndpointWidget, data.Id(), widget); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointWidget, data.Id(), widget); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -152,7 +152,7 @@ func readResourceWidget(ctx context.Context, data *schema.ResourceData, serviceN
 func createResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widget := resourceToWidget(data)
-	if err := snowClient.CreateObject(client.EndpointWidget, widget); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointWidget, widget); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -163,7 +163,7 @@ func createResourceWidget(ctx context.Context, data *schema.ResourceData, servic
 
 func updateResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointWidget, resourceToWidget(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointWidget, resourceToWidget(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -172,7 +172,7 @@ func updateResourceWidget(ctx context.Context, data *schema.ResourceData, servic
 
 func deleteResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointWidget, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointWidget, data.Id()))
 }
 
 func resourceFromWidget(data *schema.ResourceData, widget *client.Widget) {

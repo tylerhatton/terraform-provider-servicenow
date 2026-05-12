@@ -51,7 +51,7 @@ func ResourceApplication() *schema.Resource {
 func readResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := &client.Application{}
-	if err := snowClient.GetObject(client.EndpointApplication, data.Id(), application); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointApplication, data.Id(), application); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -68,7 +68,7 @@ func readResourceApplication(ctx context.Context, data *schema.ResourceData, ser
 func createResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := resourceToApplication(data)
-	if err := snowClient.CreateObject(client.EndpointApplication, application); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointApplication, application); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -79,7 +79,7 @@ func createResourceApplication(ctx context.Context, data *schema.ResourceData, s
 
 func updateResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointApplication, resourceToApplication(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointApplication, resourceToApplication(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -88,7 +88,7 @@ func updateResourceApplication(ctx context.Context, data *schema.ResourceData, s
 
 func deleteResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointApplication, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointApplication, data.Id()))
 }
 
 func resourceFromApplication(data *schema.ResourceData, application *client.Application) {

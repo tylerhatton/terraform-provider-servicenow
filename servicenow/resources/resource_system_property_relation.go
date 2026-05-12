@@ -51,7 +51,7 @@ func ResourceSystemPropertyRelation() *schema.Resource {
 func readResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyRelation := &client.SystemPropertyRelation{}
-	if err := snowClient.GetObject(client.EndpointSystemPropertyRelation, data.Id(), systemPropertyRelation); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointSystemPropertyRelation, data.Id(), systemPropertyRelation); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -68,7 +68,7 @@ func readResourceSystemPropertyRelation(ctx context.Context, data *schema.Resour
 func createResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyRelation := resourceToSystemPropertyRelation(data)
-	if err := snowClient.CreateObject(client.EndpointSystemPropertyRelation, systemPropertyRelation); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointSystemPropertyRelation, systemPropertyRelation); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -79,7 +79,7 @@ func createResourceSystemPropertyRelation(ctx context.Context, data *schema.Reso
 
 func updateResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointSystemPropertyRelation, resourceToSystemPropertyRelation(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointSystemPropertyRelation, resourceToSystemPropertyRelation(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -88,7 +88,7 @@ func updateResourceSystemPropertyRelation(ctx context.Context, data *schema.Reso
 
 func deleteResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointSystemPropertyRelation, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointSystemPropertyRelation, data.Id()))
 }
 
 func resourceFromSystemPropertyRelation(data *schema.ResourceData, systemPropertyRelation *client.SystemPropertyRelation) {

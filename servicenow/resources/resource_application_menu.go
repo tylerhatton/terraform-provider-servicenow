@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -50,14 +51,11 @@ func ResourceApplicationMenu() *schema.Resource {
 				Description: "Defines the text that appears in a tooltip when a user points to a link to this application.",
 			},
 			applicationMenuDeviceType: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "browser",
-				Description: "Type of device where this menu will appear. Can be 'browser' or 'mobile'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"browser", "mobile"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "browser",
+				Description:  "Type of device where this menu will appear. Can be 'browser' or 'mobile'.",
+				ValidateFunc: validation.StringInSlice([]string{"browser", "mobile"}, false),
 			},
 			applicationMenuOrder: {
 				Type:        schema.TypeInt,
@@ -92,7 +90,7 @@ func ResourceApplicationMenu() *schema.Resource {
 func readResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationMenu := &client.ApplicationMenu{}
-	if err := snowClient.GetObject(client.EndpointApplicationMenu, data.Id(), applicationMenu); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointApplicationMenu, data.Id(), applicationMenu); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -109,7 +107,7 @@ func readResourceApplicationMenu(ctx context.Context, data *schema.ResourceData,
 func createResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationMenu := resourceToApplicationMenu(data)
-	if err := snowClient.CreateObject(client.EndpointApplicationMenu, applicationMenu); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointApplicationMenu, applicationMenu); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -120,7 +118,7 @@ func createResourceApplicationMenu(ctx context.Context, data *schema.ResourceDat
 
 func updateResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointApplicationMenu, resourceToApplicationMenu(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointApplicationMenu, resourceToApplicationMenu(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -129,7 +127,7 @@ func updateResourceApplicationMenu(ctx context.Context, data *schema.ResourceDat
 
 func deleteResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointApplicationMenu, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointApplicationMenu, data.Id()))
 }
 
 func resourceFromApplicationMenu(data *schema.ResourceData, applicationMenu *client.ApplicationMenu) {

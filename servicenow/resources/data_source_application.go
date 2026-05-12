@@ -24,7 +24,7 @@ func DataSourceApplication() *schema.Resource {
 func readDataSourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := &client.Application{}
-	if err := snowClient.GetObjectByName(client.EndpointApplication, data.Get(applicationName).(string), application); err != nil {
+	if err := snowClient.GetObjectByName(ctx, client.EndpointApplication, data.Get(applicationName).(string), application); err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

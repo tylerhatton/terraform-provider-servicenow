@@ -50,7 +50,7 @@ func ResourceRestMessageHeader() *schema.Resource {
 func readResourceRestMessageHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMessageHeader := &client.RestMessageHeader{}
-	if err := snowClient.GetObject(client.EndpointRestMessageHeader, data.Id(), restMessageHeader); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointRestMessageHeader, data.Id(), restMessageHeader); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -67,7 +67,7 @@ func readResourceRestMessageHeader(ctx context.Context, data *schema.ResourceDat
 func createResourceRestMessageHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMessageHeader := resourceToRestMessageHeader(data)
-	if err := snowClient.CreateObject(client.EndpointRestMessageHeader, restMessageHeader); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointRestMessageHeader, restMessageHeader); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -78,7 +78,7 @@ func createResourceRestMessageHeader(ctx context.Context, data *schema.ResourceD
 
 func updateResourceRestMessageHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointRestMessageHeader, resourceToRestMessageHeader(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointRestMessageHeader, resourceToRestMessageHeader(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -87,7 +87,7 @@ func updateResourceRestMessageHeader(ctx context.Context, data *schema.ResourceD
 
 func deleteResourceRestMessageHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMessageHeader, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointRestMessageHeader, data.Id()))
 }
 
 func resourceFromRestMessageHeader(data *schema.ResourceData, restMessageHeader *client.RestMessageHeader) {

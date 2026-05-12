@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -29,14 +30,11 @@ func ResourceJsInclude() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			jsIncludeSource: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "url",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"url", "local"})
-					return
-				},
-				Description: "Source type of the JS include. Can be 'url' for an external link or 'local' for a UI script.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "url",
+				ValidateFunc: validation.StringInSlice([]string{"url", "local"}, false),
+				Description:  "Source type of the JS include. Can be 'url' for an external link or 'local' for a UI script.",
 			},
 			jsIncludeDisplayName: {
 				Type:        schema.TypeString,
@@ -44,10 +42,11 @@ func ResourceJsInclude() *schema.Resource {
 				Description: "Display name of the JS include.",
 			},
 			jsIncludeURL: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: "URL of the external JavaScript file when source is set to 'url'.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "",
+				ValidateFunc: validation.Any(validation.StringIsEmpty, validation.IsURLWithScheme([]string{"http", "https"})),
+				Description:  "URL of the external JavaScript file when source is set to 'url'.",
 			},
 			jsIncludeUIScriptID: {
 				Type:        schema.TypeString,
@@ -63,7 +62,7 @@ func ResourceJsInclude() *schema.Resource {
 func readResourceJsInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsInclude := &client.JsInclude{}
-	if err := snowClient.GetObject(client.EndpointJsInclude, data.Id(), jsInclude); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointJsInclude, data.Id(), jsInclude); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -81,7 +80,7 @@ func createResourceJsInclude(ctx context.Context, data *schema.ResourceData, ser
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	desiredDisplayName := data.Get(jsIncludeDisplayName).(string)
 	jsInclude := resourceToJsInclude(data)
-	if err := snowClient.CreateObject(client.EndpointJsInclude, jsInclude); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointJsInclude, jsInclude); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -90,7 +89,7 @@ func createResourceJsInclude(ctx context.Context, data *schema.ResourceData, ser
 	// apply it.
 	if desiredDisplayName != "" && jsInclude.DisplayName != desiredDisplayName {
 		jsInclude.DisplayName = desiredDisplayName
-		if err := snowClient.UpdateObject(client.EndpointJsInclude, jsInclude); err != nil {
+		if err := snowClient.UpdateObject(ctx, client.EndpointJsInclude, jsInclude); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -102,7 +101,7 @@ func createResourceJsInclude(ctx context.Context, data *schema.ResourceData, ser
 
 func updateResourceJsInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointJsInclude, resourceToJsInclude(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointJsInclude, resourceToJsInclude(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -111,7 +110,7 @@ func updateResourceJsInclude(ctx context.Context, data *schema.ResourceData, ser
 
 func deleteResourceJsInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointJsInclude, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointJsInclude, data.Id()))
 }
 
 func resourceFromJsInclude(data *schema.ResourceData, jsInclude *client.JsInclude) {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -53,14 +54,11 @@ func ResourceUIScript() *schema.Resource {
 				Description: "If set to 'true', this UI Script is enabled and available for use.",
 			},
 			uiScriptUIType: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "all",
-				Description: "The UI type this script applies to. Valid values are 'all', 'desktop', or 'mobile'.",
-				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
-					warns, errs = validateStringValue(val.(string), key, []string{"all", "desktop", "mobile"})
-					return
-				},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "all",
+				Description:  "The UI type this script applies to. Valid values are 'all', 'desktop', or 'mobile'.",
+				ValidateFunc: validation.StringInSlice([]string{"all", "desktop", "mobile"}, false),
 			},
 			uiScriptAPIName: {
 				Type:        schema.TypeString,
@@ -75,7 +73,7 @@ func ResourceUIScript() *schema.Resource {
 func readResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiScript := &client.UIScript{}
-	if err := snowClient.GetObject(client.EndpointUIScript, data.Id(), uiScript); err != nil {
+	if err := snowClient.GetObject(ctx, client.EndpointUIScript, data.Id(), uiScript); err != nil {
 		if client.IsNotFound(err) {
 			data.SetId("")
 			return nil
@@ -92,7 +90,7 @@ func readResourceUIScript(ctx context.Context, data *schema.ResourceData, servic
 func createResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiScript := resourceToUIScript(data)
-	if err := snowClient.CreateObject(client.EndpointUIScript, uiScript); err != nil {
+	if err := snowClient.CreateObject(ctx, client.EndpointUIScript, uiScript); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -103,7 +101,7 @@ func createResourceUIScript(ctx context.Context, data *schema.ResourceData, serv
 
 func updateResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	if err := snowClient.UpdateObject(client.EndpointUIScript, resourceToUIScript(data)); err != nil {
+	if err := snowClient.UpdateObject(ctx, client.EndpointUIScript, resourceToUIScript(data)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -112,7 +110,7 @@ func updateResourceUIScript(ctx context.Context, data *schema.ResourceData, serv
 
 func deleteResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIScript, data.Id()))
+	return diag.FromErr(snowClient.DeleteObject(ctx, client.EndpointUIScript, data.Id()))
 }
 
 func resourceFromUIScript(data *schema.ResourceData, script *client.UIScript) {
