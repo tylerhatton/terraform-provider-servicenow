@@ -15,4 +15,5 @@ type ACL struct {
 	Advanced       bool   `json:"advanced,string"`
 	Condition      string `json:"condition,omitempty"`
 	Script         string `json:"script,omitempty"`
+	Roles          string `json:"roles,omitempty"`
 }

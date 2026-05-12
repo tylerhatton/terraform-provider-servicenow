@@ -35,6 +35,11 @@ func setOnlyRequiredSchema(schema map[string]*schema.Schema, requiredName string
 		val.ForceNew = false
 		val.Default = nil
 		val.ValidateFunc = nil
+		// DiffSuppressFunc is only meaningful when there is a config value to
+		// compare against state; data source attributes are computed-only, so
+		// reset it to prevent the SDK's InternalValidate from rejecting the
+		// schema.
+		val.DiffSuppressFunc = nil
 
 		if key == requiredName {
 			val.Computed = false

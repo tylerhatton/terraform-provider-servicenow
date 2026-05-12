@@ -287,4 +287,146 @@ func init() {
 			return sweepByNamePrefix("sys_db_object.do", "u_tf")
 		},
 	})
+
+	// --- New resources (Tier 1/2/3) ---
+
+	resource.AddTestSweepers("servicenow_user", &resource.Sweeper{
+		Name: "servicenow_user",
+		F: func(region string) error {
+			return sweepByFieldPrefix("sys_user.do", "user_name", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_group", &resource.Sweeper{
+		Name: "servicenow_group",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_user_group.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_business_rule", &resource.Sweeper{
+		Name: "servicenow_business_rule",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_script.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_client_script", &resource.Sweeper{
+		Name: "servicenow_client_script",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_script_client.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_ui_action", &resource.Sweeper{
+		Name: "servicenow_ui_action",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_ui_action.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_ui_policy", &resource.Sweeper{
+		Name: "servicenow_ui_policy",
+		F: func(region string) error {
+			return sweepByFieldPrefix("sys_ui_policy.do", "short_description", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_dictionary", &resource.Sweeper{
+		Name: "servicenow_dictionary",
+		F: func(region string) error {
+			return sweepByFieldPrefix("sys_dictionary.do", "element", "u_tf_acc_")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_acl_resource", &resource.Sweeper{
+		Name: "servicenow_acl_resource",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_security_acl.do", "tf_acc_")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_notification", &resource.Sweeper{
+		Name: "servicenow_notification",
+		F: func(region string) error {
+			return sweepByNamePrefix("sysevent_email_action.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_email_template", &resource.Sweeper{
+		Name: "servicenow_email_template",
+		F: func(region string) error {
+			return sweepByNamePrefix("sysevent_email_template.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_scheduled_job", &resource.Sweeper{
+		Name: "servicenow_scheduled_job",
+		F: func(region string) error {
+			return sweepByNamePrefix("sysauto_script.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_script_action", &resource.Sweeper{
+		Name: "servicenow_script_action",
+		F: func(region string) error {
+			return sweepByNamePrefix("sysevent_script_action.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_assignment_rule", &resource.Sweeper{
+		Name: "servicenow_assignment_rule",
+		F: func(region string) error {
+			return sweepByNamePrefix("sysrule_assignment.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_data_lookup", &resource.Sweeper{
+		Name: "servicenow_data_lookup",
+		F: func(region string) error {
+			return sweepByNamePrefix("dl_definition.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_transform_map", &resource.Sweeper{
+		Name: "servicenow_transform_map",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_transform_map.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_certificate", &resource.Sweeper{
+		Name: "servicenow_certificate",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_certificate.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_mid_server", &resource.Sweeper{
+		Name: "servicenow_mid_server",
+		F: func(region string) error {
+			return sweepByNamePrefix("ecc_agent.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_jdbc_connection", &resource.Sweeper{
+		Name: "servicenow_jdbc_connection",
+		F: func(region string) error {
+			return sweepByNamePrefix("jdbc_connection.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_flow", &resource.Sweeper{
+		Name: "servicenow_flow",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_hub_flow.do", "tf-acc-")
+		},
+	})
+
+	resource.AddTestSweepers("servicenow_encryption_context", &resource.Sweeper{
+		Name: "servicenow_encryption_context",
+		F: func(region string) error {
+			return sweepByNamePrefix("sys_encryption_context.do", "tf-acc-")
+		},
+	})
 }

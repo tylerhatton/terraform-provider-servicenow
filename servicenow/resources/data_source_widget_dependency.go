@@ -1,0 +1,35 @@
+package resources
+
+import (
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
+)
+
+// DataSourceWidgetDependency reads the information about a single Widget Dependency in ServiceNow.
+func DataSourceWidgetDependency() *schema.Resource {
+	// Copy the schema from the resource.
+	resourceSchema := ResourceWidgetDependency().Schema
+	setOnlyRequiredSchema(resourceSchema, widgetDependencyName)
+
+	return &schema.Resource{
+		Description: "`servicenow_widget_dependency` data source can be used to retrieve information of a single Widget Dependency in ServiceNow by name.",
+		ReadContext: readDataSourceWidgetDependency,
+		Schema:      resourceSchema,
+	}
+}
+
+func readDataSourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
+	snowClient := serviceNowClient.(client.ServiceNowClient)
+	widgetDependency := &client.WidgetDependency{}
+	if err := snowClient.GetObjectByName(ctx, client.EndpointWidgetDependency, data.Get(widgetDependencyName).(string), widgetDependency); err != nil {
+		data.SetId("")
+		return diag.FromErr(err)
+	}
+
+	resourceFromWidgetDependency(data, widgetDependency)
+
+	return nil
+}
