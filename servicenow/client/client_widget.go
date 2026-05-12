@@ -12,13 +12,13 @@ type Widget struct {
 	CSS          string `json:"css"`
 	Public       bool   `json:"public,string"`
 	Roles        string `json:"roles"`
-	Link         string `json:"link"`
+	Link         string `json:"link,omitempty"`
 	Description  string `json:"description"`
-	ClientScript string `json:"client_script"`
-	ServerScript string `json:"script"`
+	ClientScript string `json:"client_script,omitempty"`
+	ServerScript string `json:"script,omitempty"`
 	DemoData     string `json:"demo_data"`
 	OptionSchema string `json:"option_schema"`
 	HasPreview   bool   `json:"has_preview,string"`
-	DataTable    string `json:"data_table"`
+	DataTable    string `json:"data_table,omitempty"`
 	ControllerAs string `json:"controller_as"`
 }

@@ -454,15 +454,18 @@ func TestAccResourceDBTable_basic(t *testing.T) {
 		ProviderFactories: testAccProviderFactories(),
 		Steps: []resource.TestStep{
 			{
+				// ServiceNow normalizes the label to Title Case after creation
+				// (e.g. "TF" -> "Tf"). Use a label that is already in Title Case
+				// so we have a stable expected value.
 				Config: providerBlock() + `
 resource "servicenow_db_table" "test" {
-  label     = "TF Acc Test Table"
+  label     = "Acceptance Test Table"
   user_role = ""
 }
 `,
 				Check: resource.ComposeTestCheckFunc(
 					checkExists("servicenow_db_table.test"),
-					resource.TestCheckResourceAttr("servicenow_db_table.test", "label", "TF Acc Test Table"),
+					resource.TestCheckResourceAttr("servicenow_db_table.test", "label", "Acceptance Test Table"),
 					resource.TestCheckResourceAttrSet("servicenow_db_table.test", "id"),
 					resource.TestCheckResourceAttrSet("servicenow_db_table.test", "name"),
 				),

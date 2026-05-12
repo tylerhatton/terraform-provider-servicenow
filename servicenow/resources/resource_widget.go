@@ -75,8 +75,8 @@ func ResourceWidget() *schema.Resource {
 			widgetLink: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
-				Description: "Link function script executed when the widget is linked.",
+				Computed:    true,
+				Description: "Link function script executed when the widget is linked. ServiceNow provides a default value if not specified.",
 			},
 			widgetDescription: {
 				Type:        schema.TypeString,
@@ -87,14 +87,14 @@ func ResourceWidget() *schema.Resource {
 			widgetClientScript: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
-				Description: "Client-side AngularJS controller script for the widget.",
+				Computed:    true,
+				Description: "Client-side AngularJS controller script for the widget. ServiceNow provides a default value if not specified.",
 			},
 			widgetServerScript: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
-				Description: "Server-side script executed when the widget loads.",
+				Computed:    true,
+				Description: "Server-side script executed when the widget loads. ServiceNow provides a default value if not specified.",
 			},
 			widgetDemoData: {
 				Type:        schema.TypeString,
@@ -117,8 +117,8 @@ func ResourceWidget() *schema.Resource {
 			widgetDataTable: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "",
-				Description: "The ServiceNow table the widget fetches data from.",
+				Computed:    true,
+				Description: "The ServiceNow table the widget fetches data from. ServiceNow defaults to 'sp_instance' if not specified.",
 			},
 			widgetControllerAs: {
 				Type:        schema.TypeString,

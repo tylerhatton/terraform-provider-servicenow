@@ -79,9 +79,20 @@ func readResourceJsInclude(ctx context.Context, data *schema.ResourceData, servi
 
 func createResourceJsInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
+	desiredDisplayName := data.Get(jsIncludeDisplayName).(string)
 	jsInclude := resourceToJsInclude(data)
 	if err := snowClient.CreateObject(client.EndpointJsInclude, jsInclude); err != nil {
 		return diag.FromErr(err)
+	}
+
+	// ServiceNow overrides display_name with the URL value on insert. If the
+	// user requested a different display_name, perform a follow-up update to
+	// apply it.
+	if desiredDisplayName != "" && jsInclude.DisplayName != desiredDisplayName {
+		jsInclude.DisplayName = desiredDisplayName
+		if err := snowClient.UpdateObject(client.EndpointJsInclude, jsInclude); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	resourceFromJsInclude(data, jsInclude)
