@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,40 +17,43 @@ func ResourceCSSIncludeRelation() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_css_include_relation` manages a relation between a CSS include and a widget dependency within ServiceNow.",
 
-		Create: createResourceCSSIncludeRelation,
-		Read:   readResourceCSSIncludeRelation,
-		Update: updateResourceCSSIncludeRelation,
-		Delete: deleteResourceCSSIncludeRelation,
+		CreateContext: createResourceCSSIncludeRelation,
+		ReadContext:   readResourceCSSIncludeRelation,
+		UpdateContext: updateResourceCSSIncludeRelation,
+		DeleteContext: deleteResourceCSSIncludeRelation,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			cssIncludeRelationDependencyID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Sys ID of the widget dependency this CSS include is associated with.",
 			},
 			cssIncludeRelationCSSIncludeID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Sys ID of the CSS include to associate with the widget dependency.",
 			},
 			cssIncludeRelationOrder: {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  100,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     100,
+				Description: "The load order for the CSS include within the widget dependency.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceCSSIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssIncludeRelation := &client.CSSIncludeRelation{}
 	if err := snowClient.GetObject(client.EndpointCSSIncludeRelation, data.Id(), cssIncludeRelation); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromCSSIncludeRelation(data, cssIncludeRelation)
@@ -55,30 +61,30 @@ func readResourceCSSIncludeRelation(data *schema.ResourceData, serviceNowClient 
 	return nil
 }
 
-func createResourceCSSIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssIncludeRelation := resourceToCSSIncludeRelation(data)
 	if err := snowClient.CreateObject(client.EndpointCSSIncludeRelation, cssIncludeRelation); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromCSSIncludeRelation(data, cssIncludeRelation)
 
-	return readResourceCSSIncludeRelation(data, serviceNowClient)
+	return readResourceCSSIncludeRelation(ctx, data, serviceNowClient)
 }
 
-func updateResourceCSSIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointCSSIncludeRelation, resourceToCSSIncludeRelation(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceCSSIncludeRelation(data, serviceNowClient)
+	return readResourceCSSIncludeRelation(ctx, data, serviceNowClient)
 }
 
-func deleteResourceCSSIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceCSSIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointCSSIncludeRelation, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointCSSIncludeRelation, data.Id()))
 }
 
 func resourceFromCSSIncludeRelation(data *schema.ResourceData, cssIncludeRelation *client.CSSIncludeRelation) {

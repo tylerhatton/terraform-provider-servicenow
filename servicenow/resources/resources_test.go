@@ -1,12 +1,14 @@
 package resources_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/stretchr/testify/mock"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/resources"
@@ -23,6 +25,11 @@ func (m *ClientMock) GetObject(endpoint string, id string, responseObjectOut cli
 
 func (m *ClientMock) GetObjectByName(endpoint string, name string, responseObjectOut client.Record) error {
 	args := m.Called(endpoint, name, responseObjectOut)
+	return args.Error(0)
+}
+
+func (m *ClientMock) GetObjectByTitle(endpoint string, title string, responseObjectOut client.Record) error {
+	args := m.Called(endpoint, title, responseObjectOut)
 	return args.Error(0)
 }
 
@@ -60,9 +67,53 @@ func (m *RecordMock) GetStatus() string {
 	return args.String(0)
 }
 
-func (m *RecordMock) GetError() string {
+func (m *RecordMock) GetError() *client.ErrorDetail {
 	args := m.Called()
-	return args.String(0)
+	if v := args.Get(0); v != nil {
+		return v.(*client.ErrorDetail)
+	}
+	return nil
+}
+
+// callRead invokes ReadContext if set, otherwise falls back to Read.
+// Returns true if any diagnostics have errors (or the error return is non-nil).
+func callRead(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
+	if res.ReadContext != nil {
+		diags := res.ReadContext(context.Background(), data, meta)
+		return diags.HasError()
+	}
+	err := res.Read(data, meta)
+	return err != nil
+}
+
+// callCreate invokes CreateContext if set, otherwise falls back to Create.
+func callCreate(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
+	if res.CreateContext != nil {
+		diags := res.CreateContext(context.Background(), data, meta)
+		return diags.HasError()
+	}
+	err := res.Create(data, meta)
+	return err != nil
+}
+
+// callUpdate invokes UpdateContext if set, otherwise falls back to Update.
+func callUpdate(res *schema.Resource, data *schema.ResourceData, meta interface{}) (bool, diag.Diagnostics) {
+	if res.UpdateContext != nil {
+		diags := res.UpdateContext(context.Background(), data, meta)
+		return diags.HasError(), diags
+	}
+	err := res.Update(data, meta)
+	return err != nil, nil
+}
+
+// callDelete invokes DeleteContext if set, otherwise falls back to Delete.
+func callDelete(res *schema.Resource, data *schema.ResourceData, meta interface{}) bool {
+	if res.DeleteContext != nil {
+		diags := res.DeleteContext(context.Background(), data, meta)
+		return diags.HasError()
+	}
+	err := res.Delete(data, meta)
+	return err != nil
 }
 
 var resourcesToTest = []*schema.Resource{
@@ -119,28 +170,28 @@ var dataSourcesToTest = []*schema.Resource{
 
 func TestResourcesCanRead(t *testing.T) {
 	for _, res := range resourcesToTest {
-		data := schema.ResourceData{}
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
 		data.SetId("hello")
 		clientMock := new(ClientMock)
 		clientMock.
 			On("GetObject", mock.AnythingOfType("string"), "hello", mock.Anything).
 			Return(nil)
 
-		res.Read(&data, clientMock)
+		callRead(res, data, clientMock)
 		clientMock.AssertExpectations(t)
 	}
 }
 
 func TestResourceRestMessageHandleReadError(t *testing.T) {
 	for _, res := range resourcesToTest {
-		data := schema.ResourceData{}
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
 		data.SetId("hello")
 		clientMock := new(ClientMock)
 		clientMock.
 			On("GetObject", mock.AnythingOfType("string"), "hello", mock.Anything).
 			Return(fmt.Errorf("nothing to see here"))
 
-		res.Read(&data, clientMock)
+		callRead(res, data, clientMock)
 		clientMock.AssertExpectations(t)
 		assert.Equal(t, "", data.Id())
 	}
@@ -148,16 +199,29 @@ func TestResourceRestMessageHandleReadError(t *testing.T) {
 
 func TestDataSourcesCanRead(t *testing.T) {
 	for _, res := range dataSourcesToTest {
-		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
-			"name": "oi",
-		})
+		_, hasName := res.Schema["name"]
+		_, hasTitle := res.Schema["title"]
 
+		var data *schema.ResourceData
 		clientMock := new(ClientMock)
-		clientMock.
-			On("GetObjectByName", mock.AnythingOfType("string"), "oi", mock.Anything).
-			Return(nil)
 
-		res.Read(data, clientMock)
+		if hasTitle && !hasName {
+			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"title": "oi",
+			})
+			clientMock.
+				On("GetObjectByTitle", mock.AnythingOfType("string"), "oi", mock.Anything).
+				Return(nil)
+		} else {
+			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"name": "oi",
+			})
+			clientMock.
+				On("GetObjectByName", mock.AnythingOfType("string"), "oi", mock.Anything).
+				Return(nil)
+		}
+
+		callRead(res, data, clientMock)
 		clientMock.AssertExpectations(t)
 	}
 }
@@ -190,21 +254,101 @@ func TestResourcesCanUpdate(t *testing.T) {
 			On("GetObject", mock.AnythingOfType("string"), "fenouille", mock.Anything).
 			Return(nil)
 
-		res.Update(data, clientMock)
+		callUpdate(res, data, clientMock)
 		clientMock.AssertExpectations(t)
 	}
 }
 
 func TestResourcesCanDelete(t *testing.T) {
 	for _, res := range resourcesToTest {
-		data := schema.ResourceData{}
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
 		data.SetId("fenouille")
 		clientMock := new(ClientMock)
 		clientMock.
 			On("DeleteObject", mock.AnythingOfType("string"), "fenouille").
 			Return(nil)
 
-		res.Delete(&data, clientMock)
+		callDelete(res, data, clientMock)
+		clientMock.AssertExpectations(t)
+	}
+}
+
+func TestResourcesCanCreate(t *testing.T) {
+	for _, res := range resourcesToTest {
+		fakeData := map[string]interface{}{}
+		// Fill the data with stuff following the schema.
+		for key, prop := range res.Schema {
+			if !prop.Computed {
+				switch prop.Type {
+				case schema.TypeString:
+					fakeData[key] = "hello"
+				case schema.TypeBool:
+					fakeData[key] = true
+				case schema.TypeInt:
+					fakeData[key] = 42
+				}
+			}
+		}
+
+		data := schema.TestResourceDataRaw(t, res.Schema, fakeData)
+
+		clientMock := new(ClientMock)
+		clientMock.
+			On("CreateObject", mock.AnythingOfType("string"), mock.Anything).
+			Return(nil)
+		clientMock.
+			On("GetObject", mock.AnythingOfType("string"), "", mock.Anything).
+			Return(nil)
+
+		hasError := callCreate(res, data, clientMock)
+		clientMock.AssertExpectations(t)
+		assert.False(t, hasError)
+	}
+}
+
+func TestResourcesReturnErrorOnUpdateFailure(t *testing.T) {
+	for _, res := range resourcesToTest {
+		fakeData := map[string]interface{}{}
+		// Fill the data with stuff following the schema.
+		for key, prop := range res.Schema {
+			if !prop.Computed {
+				switch prop.Type {
+				case schema.TypeString:
+					fakeData[key] = "hello"
+				case schema.TypeBool:
+					fakeData[key] = true
+				case schema.TypeInt:
+					fakeData[key] = 42
+				}
+			}
+		}
+
+		data := schema.TestResourceDataRaw(t, res.Schema, fakeData)
+		data.SetId("fenouille")
+
+		clientMock := new(ClientMock)
+		clientMock.
+			On("UpdateObject", mock.AnythingOfType("string"), mock.Anything).
+			Return(fmt.Errorf("update failed"))
+
+		hasError, _ := callUpdate(res, data, clientMock)
+		clientMock.AssertExpectations(t)
+		assert.True(t, hasError)
+	}
+}
+
+func TestResourcesDeleteHandlesNotFound(t *testing.T) {
+	for _, res := range resourcesToTest {
+		data := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{})
+		data.SetId("fenouille")
+		clientMock := new(ClientMock)
+		clientMock.
+			On("DeleteObject", mock.AnythingOfType("string"), "fenouille").
+			Return(fmt.Errorf("record not found"))
+
+		// When DeleteObject returns an error, the delete function propagates it.
+		// We verify the mock was called correctly and the function did not panic.
+		callDelete(res, data, clientMock)
 		clientMock.AssertExpectations(t)
 	}
 }

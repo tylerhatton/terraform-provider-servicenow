@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -22,13 +25,13 @@ func ResourceScriptedRestApi() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_scripted_rest_api` manages a scripted REST API within ServiceNow.",
 
-		Create: createResourceScriptedRestApi,
-		Read:   readResourceScriptedRestApi,
-		Update: updateResourceScriptedRestApi,
-		Delete: deleteResourceScriptedRestApi,
+		CreateContext: createResourceScriptedRestApi,
+		ReadContext:   readResourceScriptedRestApi,
+		UpdateContext: updateResourceScriptedRestApi,
+		DeleteContext: deleteResourceScriptedRestApi,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -91,12 +94,12 @@ func ResourceScriptedRestApi() *schema.Resource {
 	}
 }
 
-func readResourceScriptedRestApi(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceScriptedRestApi(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptedRestApi := &client.ScriptedRestApi{}
 	if err := snowClient.GetObject(client.EndpointScriptedRestApi, data.Id(), scriptedRestApi); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptedRestApi(data, scriptedRestApi)
@@ -104,30 +107,30 @@ func readResourceScriptedRestApi(data *schema.ResourceData, serviceNowClient int
 	return nil
 }
 
-func createResourceScriptedRestApi(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceScriptedRestApi(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptedRestApi := resourceToScriptedRestApi(data)
 	if err := snowClient.CreateObject(client.EndpointScriptedRestApi, scriptedRestApi); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptedRestApi(data, scriptedRestApi)
 
-	return readResourceScriptedRestApi(data, serviceNowClient)
+	return readResourceScriptedRestApi(ctx, data, serviceNowClient)
 }
 
-func updateResourceScriptedRestApi(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceScriptedRestApi(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointScriptedRestApi, resourceToScriptedRestApi(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceScriptedRestApi(data, serviceNowClient)
+	return readResourceScriptedRestApi(ctx, data, serviceNowClient)
 }
 
-func deleteResourceScriptedRestApi(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceScriptedRestApi(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointScriptedRestApi, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointScriptedRestApi, data.Id()))
 }
 
 func resourceFromScriptedRestApi(data *schema.ResourceData, scriptedRestApi *client.ScriptedRestApi) {

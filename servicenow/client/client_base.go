@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -176,7 +176,7 @@ func (client *Client) requestJSON(method string, path string, jsonData interface
 		return nil, err
 	}
 
-	responseData, _ := ioutil.ReadAll(response.Body)
+	responseData, _ := io.ReadAll(response.Body)
 
 	if response.StatusCode >= 300 || response.StatusCode < 200 {
 		return nil, fmt.Errorf("HTTP response status %s, %s", response.Status, responseData)

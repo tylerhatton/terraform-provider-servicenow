@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -28,13 +31,13 @@ func ResourceScriptedRestResource() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_scripted_rest_resource` manages a scripted REST resource within ServiceNow.",
 
-		Create: createResourceScriptedRestResource,
-		Read:   readResourceScriptedRestResource,
-		Update: updateResourceScriptedRestResource,
-		Delete: deleteResourceScriptedRestResource,
+		CreateContext: createResourceScriptedRestResource,
+		ReadContext:   readResourceScriptedRestResource,
+		UpdateContext: updateResourceScriptedRestResource,
+		DeleteContext: deleteResourceScriptedRestResource,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			scriptedRestResourceName: {
@@ -133,12 +136,12 @@ func ResourceScriptedRestResource() *schema.Resource {
 	}
 }
 
-func readResourceScriptedRestResource(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceScriptedRestResource(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptedRestResource := &client.ScriptedRestResource{}
 	if err := snowClient.GetObject(client.EndpointScriptedRestResource, data.Id(), scriptedRestResource); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptedRestResource(data, scriptedRestResource)
@@ -146,30 +149,30 @@ func readResourceScriptedRestResource(data *schema.ResourceData, serviceNowClien
 	return nil
 }
 
-func createResourceScriptedRestResource(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceScriptedRestResource(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptedRestResource := resourceToScriptedRestResource(data)
 	if err := snowClient.CreateObject(client.EndpointScriptedRestResource, scriptedRestResource); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptedRestResource(data, scriptedRestResource)
 
-	return readResourceScriptedRestResource(data, serviceNowClient)
+	return readResourceScriptedRestResource(ctx, data, serviceNowClient)
 }
 
-func updateResourceScriptedRestResource(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceScriptedRestResource(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointScriptedRestResource, resourceToScriptedRestResource(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceScriptedRestResource(data, serviceNowClient)
+	return readResourceScriptedRestResource(ctx, data, serviceNowClient)
 }
 
-func deleteResourceScriptedRestResource(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceScriptedRestResource(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointScriptedRestResource, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointScriptedRestResource, data.Id()))
 }
 
 func resourceFromScriptedRestResource(data *schema.ResourceData, scriptedRestResource *client.ScriptedRestResource) {
@@ -191,7 +194,6 @@ func resourceFromScriptedRestResource(data *schema.ResourceData, scriptedRestRes
 	data.Set(scriptedRestResourceWebServiceVersion, scriptedRestResource.WebServiceVersion)
 	data.Set(commonProtectionPolicy, scriptedRestResource.ProtectionPolicy)
 	data.Set(commonScope, scriptedRestResource.Scope)
-
 }
 
 func resourceToScriptedRestResource(data *schema.ResourceData) *client.ScriptedRestResource {

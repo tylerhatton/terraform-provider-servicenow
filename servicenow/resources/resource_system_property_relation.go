@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,13 +17,13 @@ func ResourceSystemPropertyRelation() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_system_property_relation` manages a relation between system property and system property category within ServiceNow.",
 
-		Create: createResourceSystemPropertyRelation,
-		Read:   readResourceSystemPropertyRelation,
-		Update: updateResourceSystemPropertyRelation,
-		Delete: deleteResourceSystemPropertyRelation,
+		CreateContext: createResourceSystemPropertyRelation,
+		ReadContext:   readResourceSystemPropertyRelation,
+		UpdateContext: updateResourceSystemPropertyRelation,
+		DeleteContext: deleteResourceSystemPropertyRelation,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -35,21 +38,22 @@ func ResourceSystemPropertyRelation() *schema.Resource {
 				Description: "The ID of the System Property to link.",
 			},
 			systemPropertyRelationOrder: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "1",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "1",
+				Description: "The display order of the system property within the category.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceSystemPropertyRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyRelation := &client.SystemPropertyRelation{}
 	if err := snowClient.GetObject(client.EndpointSystemPropertyRelation, data.Id(), systemPropertyRelation); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromSystemPropertyRelation(data, systemPropertyRelation)
@@ -57,30 +61,30 @@ func readResourceSystemPropertyRelation(data *schema.ResourceData, serviceNowCli
 	return nil
 }
 
-func createResourceSystemPropertyRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyRelation := resourceToSystemPropertyRelation(data)
 	if err := snowClient.CreateObject(client.EndpointSystemPropertyRelation, systemPropertyRelation); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromSystemPropertyRelation(data, systemPropertyRelation)
 
-	return readResourceSystemPropertyRelation(data, serviceNowClient)
+	return readResourceSystemPropertyRelation(ctx, data, serviceNowClient)
 }
 
-func updateResourceSystemPropertyRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointSystemPropertyRelation, resourceToSystemPropertyRelation(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceSystemPropertyRelation(data, serviceNowClient)
+	return readResourceSystemPropertyRelation(ctx, data, serviceNowClient)
 }
 
-func deleteResourceSystemPropertyRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceSystemPropertyRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointSystemPropertyRelation, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointSystemPropertyRelation, data.Id()))
 }
 
 func resourceFromSystemPropertyRelation(data *schema.ResourceData, systemPropertyRelation *client.SystemPropertyRelation) {

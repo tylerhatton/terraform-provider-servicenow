@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -13,17 +16,17 @@ func DataSourceSystemPropertyCategory() *schema.Resource {
 
 	return &schema.Resource{
 		Description: "`servicenow_system_property_category` data source can be used to retrieve information of a single system property category in ServiceNow by Sys ID",
-		Read:        readDataSourceSystemPropertyCategory,
+		ReadContext: readDataSourceSystemPropertyCategory,
 		Schema:      resourceSchema,
 	}
 }
 
-func readDataSourceSystemPropertyCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readDataSourceSystemPropertyCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyCategory := &client.SystemPropertyCategory{}
 	if err := snowClient.GetObjectByName(client.EndpointSystemPropertyCategory, data.Get(systemPropertyCategoryName).(string), systemPropertyCategory); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromSystemPropertyCategory(data, systemPropertyCategory)

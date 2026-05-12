@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -17,58 +20,64 @@ func ResourceUIScript() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_ui_script` manages a UI Script configuration within ServiceNow.",
 
-		Create: createResourceUIScript,
-		Read:   readResourceUIScript,
-		Update: updateResourceUIScript,
-		Delete: deleteResourceUIScript,
+		CreateContext: createResourceUIScript,
+		ReadContext:   readResourceUIScript,
+		UpdateContext: updateResourceUIScript,
+		DeleteContext: deleteResourceUIScript,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			uiScriptName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the UI Script.",
 			},
 			uiScriptDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Description of the UI Script.",
 			},
 			uiScriptScript: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The JavaScript body of the UI Script.",
 			},
 			uiScriptActive: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "If set to 'true', this UI Script is enabled and available for use.",
 			},
 			uiScriptUIType: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "all",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "all",
+				Description: "The UI type this script applies to. Valid values are 'all', 'desktop', or 'mobile'.",
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					warns, errs = validateStringValue(val.(string), key, []string{"all", "desktop", "mobile"})
 					return
 				},
 			},
 			uiScriptAPIName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The scoped API name of the UI Script.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceUIScript(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiScript := &client.UIScript{}
 	if err := snowClient.GetObject(client.EndpointUIScript, data.Id(), uiScript); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIScript(data, uiScript)
@@ -76,30 +85,30 @@ func readResourceUIScript(data *schema.ResourceData, serviceNowClient interface{
 	return nil
 }
 
-func createResourceUIScript(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiScript := resourceToUIScript(data)
 	if err := snowClient.CreateObject(client.EndpointUIScript, uiScript); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIScript(data, uiScript)
 
-	return readResourceUIScript(data, serviceNowClient)
+	return readResourceUIScript(ctx, data, serviceNowClient)
 }
 
-func updateResourceUIScript(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointUIScript, resourceToUIScript(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceUIScript(data, serviceNowClient)
+	return readResourceUIScript(ctx, data, serviceNowClient)
 }
 
-func deleteResourceUIScript(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceUIScript(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointUIScript, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIScript, data.Id()))
 }
 
 func resourceFromUIScript(data *schema.ResourceData, script *client.UIScript) {

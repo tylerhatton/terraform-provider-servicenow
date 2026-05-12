@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -15,13 +18,13 @@ func ResourceCSSInclude() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_css_include` manages a cascading style sheet(CSS) within ServiceNow.",
 
-		Create: createResourceCSSInclude,
-		Read:   readResourceCSSInclude,
-		Update: updateResourceCSSInclude,
-		Delete: deleteResourceCSSInclude,
+		CreateContext: createResourceCSSInclude,
+		ReadContext:   readResourceCSSInclude,
+		UpdateContext: updateResourceCSSInclude,
+		DeleteContext: deleteResourceCSSInclude,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -33,15 +36,18 @@ func ResourceCSSInclude() *schema.Resource {
 					warns, errs = validateStringValue(val.(string), key, []string{"url", "local"})
 					return
 				},
+				Description: "Source type of the CSS include. Can be 'url' for an external link or 'local' for a service portal style sheet.",
 			},
 			cssIncludeName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the CSS include.",
 			},
 			cssIncludeURL: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "URL of the external CSS file when source is set to 'url'.",
 			},
 			cssIncludeStyleSheetID: {
 				Type:        schema.TypeString,
@@ -54,12 +60,12 @@ func ResourceCSSInclude() *schema.Resource {
 	}
 }
 
-func readResourceCSSInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssInclude := &client.CSSInclude{}
 	if err := snowClient.GetObject(client.EndpointCSSInclude, data.Id(), cssInclude); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromCSSInclude(data, cssInclude)
@@ -67,30 +73,30 @@ func readResourceCSSInclude(data *schema.ResourceData, serviceNowClient interfac
 	return nil
 }
 
-func createResourceCSSInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssInclude := resourceToCSSInclude(data)
 	if err := snowClient.CreateObject(client.EndpointCSSInclude, cssInclude); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromCSSInclude(data, cssInclude)
 
-	return readResourceCSSInclude(data, serviceNowClient)
+	return readResourceCSSInclude(ctx, data, serviceNowClient)
 }
 
-func updateResourceCSSInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointCSSInclude, resourceToCSSInclude(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceCSSInclude(data, serviceNowClient)
+	return readResourceCSSInclude(ctx, data, serviceNowClient)
 }
 
-func deleteResourceCSSInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointCSSInclude, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointCSSInclude, data.Id()))
 }
 
 func resourceFromCSSInclude(data *schema.ResourceData, cssInclude *client.CSSInclude) {

@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,41 +17,44 @@ func ResourceWidgetDependency() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_widget_dependency` manages JS and CSS includes for a Widget configuration within ServiceNow.",
 
-		Create: createResourceWidgetDependency,
-		Read:   readResourceWidgetDependency,
-		Update: updateResourceWidgetDependency,
-		Delete: deleteResourceWidgetDependency,
+		CreateContext: createResourceWidgetDependency,
+		ReadContext:   readResourceWidgetDependency,
+		UpdateContext: updateResourceWidgetDependency,
+		DeleteContext: deleteResourceWidgetDependency,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			widgetDependencyName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the widget dependency.",
 			},
 			widgetDependencyModule: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The AngularJS module name for this dependency.",
 			},
 			widgetDependencyPageLoad: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this dependency is loaded on every page load.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceWidgetDependency(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widgetDependency := &client.WidgetDependency{}
 	if err := snowClient.GetObject(client.EndpointWidgetDependency, data.Id(), widgetDependency); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidgetDependency(data, widgetDependency)
@@ -56,30 +62,30 @@ func readResourceWidgetDependency(data *schema.ResourceData, serviceNowClient in
 	return nil
 }
 
-func createResourceWidgetDependency(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widgetDependency := resourceToWidgetDependency(data)
 	if err := snowClient.CreateObject(client.EndpointWidgetDependency, widgetDependency); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidgetDependency(data, widgetDependency)
 
-	return readResourceWidgetDependency(data, serviceNowClient)
+	return readResourceWidgetDependency(ctx, data, serviceNowClient)
 }
 
-func updateResourceWidgetDependency(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointWidgetDependency, resourceToWidgetDependency(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceWidgetDependency(data, serviceNowClient)
+	return readResourceWidgetDependency(ctx, data, serviceNowClient)
 }
 
-func deleteResourceWidgetDependency(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceWidgetDependency(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointWidgetDependency, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointWidgetDependency, data.Id()))
 }
 
 func resourceFromWidgetDependency(data *schema.ResourceData, widgetDependency *client.WidgetDependency) {

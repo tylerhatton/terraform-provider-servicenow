@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -19,13 +22,13 @@ func ResourceApplicationMenu() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_application_menu` manages an application menu within ServiceNow creating a new section in the application navigator.",
 
-		Create: createResourceApplicationMenu,
-		Read:   readResourceApplicationMenu,
-		Update: updateResourceApplicationMenu,
-		Delete: deleteResourceApplicationMenu,
+		CreateContext: createResourceApplicationMenu,
+		ReadContext:   readResourceApplicationMenu,
+		UpdateContext: updateResourceApplicationMenu,
+		DeleteContext: deleteResourceApplicationMenu,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -86,12 +89,12 @@ func ResourceApplicationMenu() *schema.Resource {
 	}
 }
 
-func readResourceApplicationMenu(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationMenu := &client.ApplicationMenu{}
 	if err := snowClient.GetObject(client.EndpointApplicationMenu, data.Id(), applicationMenu); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromApplicationMenu(data, applicationMenu)
@@ -99,30 +102,30 @@ func readResourceApplicationMenu(data *schema.ResourceData, serviceNowClient int
 	return nil
 }
 
-func createResourceApplicationMenu(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationMenu := resourceToApplicationMenu(data)
 	if err := snowClient.CreateObject(client.EndpointApplicationMenu, applicationMenu); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromApplicationMenu(data, applicationMenu)
 
-	return readResourceApplicationMenu(data, serviceNowClient)
+	return readResourceApplicationMenu(ctx, data, serviceNowClient)
 }
 
-func updateResourceApplicationMenu(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointApplicationMenu, resourceToApplicationMenu(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceApplicationMenu(data, serviceNowClient)
+	return readResourceApplicationMenu(ctx, data, serviceNowClient)
 }
 
-func deleteResourceApplicationMenu(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceApplicationMenu(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointApplicationMenu, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointApplicationMenu, data.Id()))
 }
 
 func resourceFromApplicationMenu(data *schema.ResourceData, applicationMenu *client.ApplicationMenu) {

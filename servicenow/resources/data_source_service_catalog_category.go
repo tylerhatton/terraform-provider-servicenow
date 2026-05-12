@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -13,17 +16,17 @@ func DataSourceServiceCatalogCategory() *schema.Resource {
 
 	return &schema.Resource{
 		Description: "`servicenow_service_catalog_category` data source can be used to retrieve information of a single service catalog category in ServiceNow by Sys ID",
-		Read:        readDataSourceServiceCatalogCategory,
+		ReadContext: readDataSourceServiceCatalogCategory,
 		Schema:      resourceSchema,
 	}
 }
 
-func readDataSourceServiceCatalogCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readDataSourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogCategory := &client.ServiceCatalogCategory{}
 	if err := snowClient.GetObjectByTitle(client.EndpointServiceCatalogCategory, data.Get(serviceCatalogCategoryTitle).(string), serviceCatalogCategory); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromServiceCatalogCategory(data, serviceCatalogCategory)

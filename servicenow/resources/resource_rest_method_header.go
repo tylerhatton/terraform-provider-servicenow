@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -12,15 +15,15 @@ const restMethodHeaderMethodID = "rest_method_id"
 // ResourceRestMethodHeader is holding the info about a header to be applied to a REST method.
 func ResourceRestMethodHeader() *schema.Resource {
 	return &schema.Resource{
-		Description: "`servicenow_rest_message_header` manages a header to be applied to a REST method within ServiceNow.",
+		Description: "`servicenow_rest_method_header` manages a header to be applied to a REST method within ServiceNow.",
 
-		Create: createResourceRestMethodHeader,
-		Read:   readResourceRestMethodHeader,
-		Update: updateResourceRestMethodHeader,
-		Delete: deleteResourceRestMethodHeader,
+		CreateContext: createResourceRestMethodHeader,
+		ReadContext:   readResourceRestMethodHeader,
+		UpdateContext: updateResourceRestMethodHeader,
+		DeleteContext: deleteResourceRestMethodHeader,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -44,12 +47,12 @@ func ResourceRestMethodHeader() *schema.Resource {
 	}
 }
 
-func readResourceRestMethodHeader(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethodHeader := &client.RestMethodHeader{}
 	if err := snowClient.GetObject(client.EndpointRestMethodHeader, data.Id(), restMethodHeader); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRestMethodHeader(data, restMethodHeader)
@@ -57,30 +60,30 @@ func readResourceRestMethodHeader(data *schema.ResourceData, serviceNowClient in
 	return nil
 }
 
-func createResourceRestMethodHeader(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethodHeader := resourceToRestMethodHeader(data)
 	if err := snowClient.CreateObject(client.EndpointRestMethodHeader, restMethodHeader); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRestMethodHeader(data, restMethodHeader)
 
-	return readResourceRestMethodHeader(data, serviceNowClient)
+	return readResourceRestMethodHeader(ctx, data, serviceNowClient)
 }
 
-func updateResourceRestMethodHeader(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointRestMethodHeader, resourceToRestMethodHeader(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceRestMethodHeader(data, serviceNowClient)
+	return readResourceRestMethodHeader(ctx, data, serviceNowClient)
 }
 
-func deleteResourceRestMethodHeader(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceRestMethodHeader(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointRestMethodHeader, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMethodHeader, data.Id()))
 }
 
 func resourceFromRestMethodHeader(data *schema.ResourceData, restMethodHeader *client.RestMethodHeader) {

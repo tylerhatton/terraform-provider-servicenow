@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -26,87 +29,102 @@ func ResourceWidget() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_widget` manages a Widget configuration within ServiceNow.",
 
-		Create: createResourceWidget,
-		Read:   readResourceWidget,
-		Update: updateResourceWidget,
-		Delete: deleteResourceWidget,
+		CreateContext: createResourceWidget,
+		ReadContext:   readResourceWidget,
+		UpdateContext: updateResourceWidget,
+		DeleteContext: deleteResourceWidget,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			widgetID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Unique identifier for the widget used in scripts and portal pages.",
 			},
 			widgetName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the widget.",
 			},
 			widgetTemplate: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The HTML template body of the widget.",
 			},
 			widgetCSS: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "CSS styles applied to the widget.",
 			},
 			widgetPublic: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this widget is accessible without authentication.",
 			},
 			widgetRoles: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Comma-separated list of roles required to use the widget.",
 			},
 			widgetLink: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Link function script executed when the widget is linked.",
 			},
 			widgetDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Description of the widget.",
 			},
 			widgetClientScript: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Client-side AngularJS controller script for the widget.",
 			},
 			widgetServerScript: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Server-side script executed when the widget loads.",
 			},
 			widgetDemoData: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Demo data in JSON format used when previewing the widget.",
 			},
 			widgetOptionSchema: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "JSON schema defining the configurable options for the widget.",
 			},
 			widgetHasPreview: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', the widget supports preview mode.",
 			},
 			widgetDataTable: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The ServiceNow table the widget fetches data from.",
 			},
 			widgetControllerAs: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "c",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "c",
+				Description: "The AngularJS controller alias used in the widget template.",
 			},
 			commonProtectionPolicy: getProtectionPolicySchema(),
 			commonScope:            getScopeSchema(),
@@ -114,12 +132,12 @@ func ResourceWidget() *schema.Resource {
 	}
 }
 
-func readResourceWidget(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widget := &client.Widget{}
 	if err := snowClient.GetObject(client.EndpointWidget, data.Id(), widget); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidget(data, widget)
@@ -127,30 +145,30 @@ func readResourceWidget(data *schema.ResourceData, serviceNowClient interface{})
 	return nil
 }
 
-func createResourceWidget(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widget := resourceToWidget(data)
 	if err := snowClient.CreateObject(client.EndpointWidget, widget); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidget(data, widget)
 
-	return readResourceWidget(data, serviceNowClient)
+	return readResourceWidget(ctx, data, serviceNowClient)
 }
 
-func updateResourceWidget(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointWidget, resourceToWidget(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceWidget(data, serviceNowClient)
+	return readResourceWidget(ctx, data, serviceNowClient)
 }
 
-func deleteResourceWidget(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceWidget(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointWidget, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointWidget, data.Id()))
 }
 
 func resourceFromWidget(data *schema.ResourceData, widget *client.Widget) {

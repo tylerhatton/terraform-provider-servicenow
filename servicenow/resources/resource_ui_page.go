@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -19,50 +22,58 @@ func ResourceUIPage() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_ui_page` manages a UI Page configuration within ServiceNow.",
 
-		Create: createResourceUIPage,
-		Read:   readResourceUIPage,
-		Update: updateResourceUIPage,
-		Delete: deleteResourceUIPage,
+		CreateContext: createResourceUIPage,
+		ReadContext:   readResourceUIPage,
+		UpdateContext: updateResourceUIPage,
+		DeleteContext: deleteResourceUIPage,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			uiPageName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the UI Page.",
 			},
 			uiPageDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Description of the UI Page.",
 			},
 			uiPageCategory: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "general",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "general",
+				Description: "Category the UI Page belongs to.",
 			},
 			uiPageDirect: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If set to 'true', this UI Page can be accessed directly via URL without being embedded in the ServiceNow frame.",
 			},
 			uiPageClientScript: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Client-side JavaScript to be executed on the UI Page.",
 			},
 			uiPageProcessingScript: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Server-side script to be executed when the UI Page loads.",
 			},
 			uiPageHTML: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The HTML body of the UI Page.",
 			},
 			uiPageEndpoint: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The URL endpoint for accessing this UI Page.",
 			},
 			commonProtectionPolicy: getProtectionPolicySchema(),
 			commonScope:            getScopeSchema(),
@@ -70,12 +81,12 @@ func ResourceUIPage() *schema.Resource {
 	}
 }
 
-func readResourceUIPage(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiPage := &client.UIPage{}
 	if err := snowClient.GetObject(client.EndpointUIPage, data.Id(), uiPage); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIPage(data, uiPage)
@@ -83,30 +94,30 @@ func readResourceUIPage(data *schema.ResourceData, serviceNowClient interface{})
 	return nil
 }
 
-func createResourceUIPage(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiPage := resourceToUIPage(data)
 	if err := snowClient.CreateObject(client.EndpointUIPage, uiPage); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIPage(data, uiPage)
 
-	return readResourceUIPage(data, serviceNowClient)
+	return readResourceUIPage(ctx, data, serviceNowClient)
 }
 
-func updateResourceUIPage(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointUIPage, resourceToUIPage(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceUIPage(data, serviceNowClient)
+	return readResourceUIPage(ctx, data, serviceNowClient)
 }
 
-func deleteResourceUIPage(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointUIPage, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIPage, data.Id()))
 }
 
 func resourceFromUIPage(data *schema.ResourceData, page *client.UIPage) {

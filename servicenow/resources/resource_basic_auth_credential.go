@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -16,13 +19,13 @@ func ResourceBasicAuthCredential() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_basic_auth_credential` manages a basic auth credential configuration within ServiceNow.",
 
-		Create: createResourceBasicAuthCredential,
-		Read:   readResourceBasicAuthCredential,
-		Update: updateResourceBasicAuthCredential,
-		Delete: deleteResourceBasicAuthCredential,
+		CreateContext: createResourceBasicAuthCredential,
+		ReadContext:   readResourceBasicAuthCredential,
+		UpdateContext: updateResourceBasicAuthCredential,
+		DeleteContext: deleteResourceBasicAuthCredential,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -59,12 +62,12 @@ func ResourceBasicAuthCredential() *schema.Resource {
 	}
 }
 
-func readResourceBasicAuthCredential(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	basicAuthCredential := &client.BasicAuthCredential{}
 	if err := snowClient.GetObject(client.EndpointBasicAuthCredential, data.Id(), basicAuthCredential); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromBasicAuthCredential(data, basicAuthCredential)
@@ -72,30 +75,30 @@ func readResourceBasicAuthCredential(data *schema.ResourceData, serviceNowClient
 	return nil
 }
 
-func createResourceBasicAuthCredential(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	basicAuthCredential := resourceToBasicAuthCredential(data)
 	if err := snowClient.CreateObject(client.EndpointBasicAuthCredential, basicAuthCredential); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromBasicAuthCredential(data, basicAuthCredential)
 
-	return readResourceBasicAuthCredential(data, serviceNowClient)
+	return readResourceBasicAuthCredential(ctx, data, serviceNowClient)
 }
 
-func updateResourceBasicAuthCredential(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointBasicAuthCredential, resourceToBasicAuthCredential(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceBasicAuthCredential(data, serviceNowClient)
+	return readResourceBasicAuthCredential(ctx, data, serviceNowClient)
 }
 
-func deleteResourceBasicAuthCredential(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointBasicAuthCredential, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointBasicAuthCredential, data.Id()))
 }
 
 func resourceFromBasicAuthCredential(data *schema.ResourceData, basicAuthCredential *client.BasicAuthCredential) {

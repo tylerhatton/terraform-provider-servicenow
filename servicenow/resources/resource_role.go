@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,40 +17,45 @@ const roleName = "name"
 // ResourceRole manages a Role in ServiceNow.
 func ResourceRole() *schema.Resource {
 	return &schema.Resource{
-		Description: "`servicenow_rest_method` manages a role within ServiceNow.",
+		Description: "`servicenow_role` manages a role within ServiceNow.",
 
-		Create: createResourceRole,
-		Read:   readResourceRole,
-		Update: updateResourceRole,
-		Delete: deleteResourceRole,
+		CreateContext: createResourceRole,
+		ReadContext:   readResourceRole,
+		UpdateContext: updateResourceRole,
+		DeleteContext: deleteResourceRole,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			roleSuffix: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The suffix of the role name. The full role name is prefixed with the application scope.",
 			},
 			roleDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Description of the role and its purpose.",
 			},
 			roleElevatedPrivilege: {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "If true, the role requires elevated privilege to be granted.",
 			},
 			roleAssignableBy: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Comma-separated list of role names that can assign this role to users.",
 			},
 			roleName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The full name of the role including application scope prefix.",
 			},
 			commonProtectionPolicy: getProtectionPolicySchema(),
 			commonScope:            getScopeSchema(),
@@ -55,12 +63,12 @@ func ResourceRole() *schema.Resource {
 	}
 }
 
-func readResourceRole(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := &client.Role{}
 	if err := snowClient.GetObject(client.EndpointRole, data.Id(), role); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRole(data, role)
@@ -68,30 +76,30 @@ func readResourceRole(data *schema.ResourceData, serviceNowClient interface{}) e
 	return nil
 }
 
-func createResourceRole(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := resourceToRole(data)
 	if err := snowClient.CreateObject(client.EndpointRole, role); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRole(data, role)
 
-	return readResourceRole(data, serviceNowClient)
+	return readResourceRole(ctx, data, serviceNowClient)
 }
 
-func updateResourceRole(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointRole, resourceToRole(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceRole(data, serviceNowClient)
+	return readResourceRole(ctx, data, serviceNowClient)
 }
 
-func deleteResourceRole(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointRole, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointRole, data.Id()))
 }
 
 func resourceFromRole(data *schema.ResourceData, role *client.Role) {

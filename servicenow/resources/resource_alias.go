@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -18,13 +21,13 @@ func ResourceAlias() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_alias` manages a connection and credential object within ServiceNow to provide connection details to a Flow Designer action.",
 
-		Create: createResourceAlias,
-		Read:   readResourceAlias,
-		Update: updateResourceAlias,
-		Delete: deleteResourceAlias,
+		CreateContext: createResourceAlias,
+		ReadContext:   readResourceAlias,
+		UpdateContext: updateResourceAlias,
+		DeleteContext: deleteResourceAlias,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -90,12 +93,12 @@ func ResourceAlias() *schema.Resource {
 	}
 }
 
-func readResourceAlias(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	alias := &client.Alias{}
 	if err := snowClient.GetObject(client.EndpointAlias, data.Id(), alias); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromAlias(data, alias)
@@ -103,30 +106,30 @@ func readResourceAlias(data *schema.ResourceData, serviceNowClient interface{}) 
 	return nil
 }
 
-func createResourceAlias(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	alias := resourceToAlias(data)
 	if err := snowClient.CreateObject(client.EndpointAlias, alias); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromAlias(data, alias)
 
-	return readResourceAlias(data, serviceNowClient)
+	return readResourceAlias(ctx, data, serviceNowClient)
 }
 
-func updateResourceAlias(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointAlias, resourceToAlias(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceAlias(data, serviceNowClient)
+	return readResourceAlias(ctx, data, serviceNowClient)
 }
 
-func deleteResourceAlias(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointAlias, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointAlias, data.Id()))
 }
 
 func resourceFromAlias(data *schema.ResourceData, alias *client.Alias) {

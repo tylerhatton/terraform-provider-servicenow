@@ -10,7 +10,7 @@ type QuestionChoice struct {
 	Value          string `json:"value"`
 	Question       string `json:"question"`
 	Order          string `json:"order"`
-	Price          string `json:"misc"`
-	RecurringPrice string `json:"rec_misc"`
+	Price          string `json:"price"`
+	RecurringPrice string `json:"recurring_price"`
 	Inactive       bool   `json:"inactive,string"`
 }

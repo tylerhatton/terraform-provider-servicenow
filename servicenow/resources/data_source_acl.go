@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -71,17 +74,17 @@ func DataSourceACL() *schema.Resource {
 
 	return &schema.Resource{
 		Description: "`servicenow_acl` data source can be used to retrieve information of a single ACL in ServiceNow by Sys ID",
-		Read:        readDataSourceACL,
+		ReadContext: readDataSourceACL,
 		Schema:      resourceSchema,
 	}
 }
 
-func readDataSourceACL(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readDataSourceACL(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	acl := &client.ACL{}
 	if err := snowClient.GetObjectByName(client.EndpointACL, data.Get(aclName).(string), acl); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromACL(data, acl)

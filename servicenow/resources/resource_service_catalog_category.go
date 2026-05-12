@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -20,13 +23,13 @@ func ResourceServiceCatalogCategory() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_service_catalog_category` manages a service catalog category configuration within ServiceNow.",
 
-		Create: createResourceServiceCatalogCategory,
-		Read:   readResourceServiceCatalogCategory,
-		Update: updateResourceServiceCatalogCategory,
-		Delete: deleteResourceServiceCatalogCategory,
+		CreateContext: createResourceServiceCatalogCategory,
+		ReadContext:   readResourceServiceCatalogCategory,
+		UpdateContext: updateResourceServiceCatalogCategory,
+		DeleteContext: deleteResourceServiceCatalogCategory,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -88,12 +91,12 @@ func ResourceServiceCatalogCategory() *schema.Resource {
 	}
 }
 
-func readResourceServiceCatalogCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogCategory := &client.ServiceCatalogCategory{}
 	if err := snowClient.GetObject(client.EndpointServiceCatalogCategory, data.Id(), serviceCatalogCategory); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromServiceCatalogCategory(data, serviceCatalogCategory)
@@ -101,30 +104,30 @@ func readResourceServiceCatalogCategory(data *schema.ResourceData, serviceNowCli
 	return nil
 }
 
-func createResourceServiceCatalogCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogCategory := resourceToServiceCatalogCategory(data)
 	if err := snowClient.CreateObject(client.EndpointServiceCatalogCategory, serviceCatalogCategory); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromServiceCatalogCategory(data, serviceCatalogCategory)
 
-	return readResourceServiceCatalogCategory(data, serviceNowClient)
+	return readResourceServiceCatalogCategory(ctx, data, serviceNowClient)
 }
 
-func updateResourceServiceCatalogCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointServiceCatalogCategory, resourceToServiceCatalogCategory(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceServiceCatalogCategory(data, serviceNowClient)
+	return readResourceServiceCatalogCategory(ctx, data, serviceNowClient)
 }
 
-func deleteResourceServiceCatalogCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceServiceCatalogCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointServiceCatalogCategory, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointServiceCatalogCategory, data.Id()))
 }
 
 func resourceFromServiceCatalogCategory(data *schema.ResourceData, serviceCatalogCategory *client.ServiceCatalogCategory) {

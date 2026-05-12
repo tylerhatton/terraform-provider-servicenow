@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -17,15 +20,15 @@ const oauthEntityAccess = "access"
 // ResourceOAuthEntity manages an OAuthEntity in ServiceNow.
 func ResourceOAuthEntity() *schema.Resource {
 	return &schema.Resource{
-		Description: "`servicenow_js_include` manages a javascript script within ServiceNow.",
+		Description: "`servicenow_oauth_entity` manages an OAuth application entity within ServiceNow.",
 
-		Create: createResourceOAuthEntity,
-		Read:   readResourceOAuthEntity,
-		Update: updateResourceOAuthEntity,
-		Delete: deleteResourceOAuthEntity,
+		CreateContext: createResourceOAuthEntity,
+		ReadContext:   readResourceOAuthEntity,
+		UpdateContext: updateResourceOAuthEntity,
+		DeleteContext: deleteResourceOAuthEntity,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -42,6 +45,7 @@ func ResourceOAuthEntity() *schema.Resource {
 			oauthEntityClientID: {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: "OAuth Client ID required during handshake.",
 			},
 			oauthEntityAccessTokenLifespan: {
@@ -63,9 +67,10 @@ func ResourceOAuthEntity() *schema.Resource {
 				Description: "The OAuth app's endpoint to receive the authorization code.",
 			},
 			oauthEntityLogoURL: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "URL of the logo image to display for the OAuth application.",
 			},
 			oauthEntityAccess: {
 				Type:        schema.TypeString,
@@ -82,12 +87,12 @@ func ResourceOAuthEntity() *schema.Resource {
 	}
 }
 
-func readResourceOAuthEntity(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	oauthEntity := &client.OAuthEntity{}
 	if err := snowClient.GetObject(client.EndpointOAuthEntity, data.Id(), oauthEntity); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromOAuthEntity(data, oauthEntity)
@@ -95,30 +100,30 @@ func readResourceOAuthEntity(data *schema.ResourceData, serviceNowClient interfa
 	return nil
 }
 
-func createResourceOAuthEntity(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	oauthEntity := resourceToOAuthEntity(data)
 	if err := snowClient.CreateObject(client.EndpointOAuthEntity, oauthEntity); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromOAuthEntity(data, oauthEntity)
 
-	return readResourceOAuthEntity(data, serviceNowClient)
+	return readResourceOAuthEntity(ctx, data, serviceNowClient)
 }
 
-func updateResourceOAuthEntity(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointOAuthEntity, resourceToOAuthEntity(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceOAuthEntity(data, serviceNowClient)
+	return readResourceOAuthEntity(ctx, data, serviceNowClient)
 }
 
-func deleteResourceOAuthEntity(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointOAuthEntity, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointOAuthEntity, data.Id()))
 }
 
 func resourceFromOAuthEntity(data *schema.ResourceData, oauthEntity *client.OAuthEntity) {

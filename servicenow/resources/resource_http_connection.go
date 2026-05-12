@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -19,13 +22,13 @@ func ResourceHttpConnection() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_http_connection` manages a HTTP connection configuration within ServiceNow.",
 
-		Create: createResourceHttpConnection,
-		Read:   readResourceHttpConnection,
-		Update: updateResourceHttpConnection,
-		Delete: deleteResourceHttpConnection,
+		CreateContext: createResourceHttpConnection,
+		ReadContext:   readResourceHttpConnection,
+		UpdateContext: updateResourceHttpConnection,
+		DeleteContext: deleteResourceHttpConnection,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -85,12 +88,12 @@ func ResourceHttpConnection() *schema.Resource {
 	}
 }
 
-func readResourceHttpConnection(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	httpConnection := &client.HttpConnection{}
 	if err := snowClient.GetObject(client.EndpointHttpConnection, data.Id(), httpConnection); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromHttpConnection(data, httpConnection)
@@ -98,30 +101,30 @@ func readResourceHttpConnection(data *schema.ResourceData, serviceNowClient inte
 	return nil
 }
 
-func createResourceHttpConnection(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	httpConnection := resourceToHttpConnection(data)
 	if err := snowClient.CreateObject(client.EndpointHttpConnection, httpConnection); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromHttpConnection(data, httpConnection)
 
-	return readResourceHttpConnection(data, serviceNowClient)
+	return readResourceHttpConnection(ctx, data, serviceNowClient)
 }
 
-func updateResourceHttpConnection(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointHttpConnection, resourceToHttpConnection(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceHttpConnection(data, serviceNowClient)
+	return readResourceHttpConnection(ctx, data, serviceNowClient)
 }
 
-func deleteResourceHttpConnection(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceHttpConnection(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointHttpConnection, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointHttpConnection, data.Id()))
 }
 
 func resourceFromHttpConnection(data *schema.ResourceData, httpConnection *client.HttpConnection) {

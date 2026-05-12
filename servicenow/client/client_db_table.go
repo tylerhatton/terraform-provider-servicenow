@@ -21,4 +21,5 @@ type DBTable struct {
 	CreateModule         bool   `json:"create_module,string"`
 	CreateMobileModule   bool   `json:"create_mobile_module,string"`
 	Name                 string `json:"name,omitempty"`
+	SuperClass           string `json:"super_class,omitempty"`
 }

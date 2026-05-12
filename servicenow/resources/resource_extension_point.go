@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -16,13 +19,13 @@ func ResourceExtensionPoint() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_extension_point` manages a scripted extension point within ServiceNow.",
 
-		Create: createResourceExtensionPoint,
-		Read:   readResourceExtensionPoint,
-		Update: updateResourceExtensionPoint,
-		Delete: deleteResourceExtensionPoint,
+		CreateContext: createResourceExtensionPoint,
+		ReadContext:   readResourceExtensionPoint,
+		UpdateContext: updateResourceExtensionPoint,
+		DeleteContext: deleteResourceExtensionPoint,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -59,12 +62,12 @@ func ResourceExtensionPoint() *schema.Resource {
 	}
 }
 
-func readResourceExtensionPoint(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	extensionPoint := &client.ExtensionPoint{}
 	if err := snowClient.GetObject(client.EndpointExtensionPoint, data.Id(), extensionPoint); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromExtensionPoint(data, extensionPoint)
@@ -72,30 +75,30 @@ func readResourceExtensionPoint(data *schema.ResourceData, serviceNowClient inte
 	return nil
 }
 
-func createResourceExtensionPoint(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	extensionPoint := resourceToExtensionPoint(data)
 	if err := snowClient.CreateObject(client.EndpointExtensionPoint, extensionPoint); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromExtensionPoint(data, extensionPoint)
 
-	return readResourceExtensionPoint(data, serviceNowClient)
+	return readResourceExtensionPoint(ctx, data, serviceNowClient)
 }
 
-func updateResourceExtensionPoint(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointExtensionPoint, resourceToExtensionPoint(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceExtensionPoint(data, serviceNowClient)
+	return readResourceExtensionPoint(ctx, data, serviceNowClient)
 }
 
-func deleteResourceExtensionPoint(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceExtensionPoint(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointExtensionPoint, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointExtensionPoint, data.Id()))
 }
 
 func resourceFromExtensionPoint(data *schema.ResourceData, extensionPoint *client.ExtensionPoint) {

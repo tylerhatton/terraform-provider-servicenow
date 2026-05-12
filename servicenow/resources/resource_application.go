@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,13 +17,13 @@ func ResourceApplication() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_application` manages an application within ServiceNow.",
 
-		Create: createResourceApplication,
-		Read:   readResourceApplication,
-		Update: updateResourceApplication,
-		Delete: deleteResourceApplication,
+		CreateContext: createResourceApplication,
+		ReadContext:   readResourceApplication,
+		UpdateContext: updateResourceApplication,
+		DeleteContext: deleteResourceApplication,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -36,20 +39,21 @@ func ResourceApplication() *schema.Resource {
 				Description: "The unique scope of the application. Normally in the format x_[companyCode]_[shortAppId]. Cannot be changed once the application is created.",
 			},
 			applicationVersion: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "1.0.0",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "1.0.0",
+				Description: "The version of the application in semver format.",
 			},
 		},
 	}
 }
 
-func readResourceApplication(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := &client.Application{}
 	if err := snowClient.GetObject(client.EndpointApplication, data.Id(), application); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromApplication(data, application)
@@ -57,30 +61,30 @@ func readResourceApplication(data *schema.ResourceData, serviceNowClient interfa
 	return nil
 }
 
-func createResourceApplication(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := resourceToApplication(data)
 	if err := snowClient.CreateObject(client.EndpointApplication, application); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromApplication(data, application)
 
-	return readResourceApplication(data, serviceNowClient)
+	return readResourceApplication(ctx, data, serviceNowClient)
 }
 
-func updateResourceApplication(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointApplication, resourceToApplication(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceApplication(data, serviceNowClient)
+	return readResourceApplication(ctx, data, serviceNowClient)
 }
 
-func deleteResourceApplication(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceApplication(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointApplication, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointApplication, data.Id()))
 }
 
 func resourceFromApplication(data *schema.ResourceData, application *client.Application) {

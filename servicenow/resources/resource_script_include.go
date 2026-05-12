@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -16,15 +19,15 @@ const scriptIncludeAPIName = "api_name"
 // ResourceScriptInclude manages a Script Include in ServiceNow.
 func ResourceScriptInclude() *schema.Resource {
 	return &schema.Resource{
-		Description: "`servicenow_rest_method` manages a script include within ServiceNow.",
+		Description: "`servicenow_script_include` manages a script include within ServiceNow.",
 
-		Create: createResourceScriptInclude,
-		Read:   readResourceScriptInclude,
-		Update: updateResourceScriptInclude,
-		Delete: deleteResourceScriptInclude,
+		CreateContext: createResourceScriptInclude,
+		ReadContext:   readResourceScriptInclude,
+		UpdateContext: updateResourceScriptInclude,
+		DeleteContext: deleteResourceScriptInclude,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -77,12 +80,12 @@ func ResourceScriptInclude() *schema.Resource {
 	}
 }
 
-func readResourceScriptInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptInclude := &client.ScriptInclude{}
 	if err := snowClient.GetObject(client.EndpointScriptInclude, data.Id(), scriptInclude); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptInclude(data, scriptInclude)
@@ -90,30 +93,30 @@ func readResourceScriptInclude(data *schema.ResourceData, serviceNowClient inter
 	return nil
 }
 
-func createResourceScriptInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	scriptInclude := resourceToScriptInclude(data)
 	if err := snowClient.CreateObject(client.EndpointScriptInclude, scriptInclude); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromScriptInclude(data, scriptInclude)
 
-	return readResourceScriptInclude(data, serviceNowClient)
+	return readResourceScriptInclude(ctx, data, serviceNowClient)
 }
 
-func updateResourceScriptInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointScriptInclude, resourceToScriptInclude(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceScriptInclude(data, serviceNowClient)
+	return readResourceScriptInclude(ctx, data, serviceNowClient)
 }
 
-func deleteResourceScriptInclude(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceScriptInclude(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointScriptInclude, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointScriptInclude, data.Id()))
 }
 
 func resourceFromScriptInclude(data *schema.ResourceData, scriptInclude *client.ScriptInclude) {

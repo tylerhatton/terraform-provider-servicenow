@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -17,13 +20,13 @@ func ResourceRestMethod() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_rest_method` manages a REST method within ServiceNow.",
 
-		Create: createResourceRestMethod,
-		Read:   readResourceRestMethod,
-		Update: updateResourceRestMethod,
-		Delete: deleteResourceRestMethod,
+		CreateContext: createResourceRestMethod,
+		ReadContext:   readResourceRestMethod,
+		UpdateContext: updateResourceRestMethod,
+		DeleteContext: deleteResourceRestMethod,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -53,20 +56,21 @@ func ResourceRestMethod() *schema.Resource {
 				Description: "The URL of the REST web service provider this method sends requests to. Can contain variables in the format '${variable}'.",
 			},
 			restMethodQualifiedName: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The fully qualified name of this REST method including the parent message name.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceRestMethod(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethod := &client.RestMethod{}
 	if err := snowClient.GetObject(client.EndpointRestMethod, data.Id(), restMethod); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRestMethod(data, restMethod)
@@ -74,30 +78,30 @@ func readResourceRestMethod(data *schema.ResourceData, serviceNowClient interfac
 	return nil
 }
 
-func createResourceRestMethod(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethod := resourceToRestMethod(data)
 	if err := snowClient.CreateObject(client.EndpointRestMethod, restMethod); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRestMethod(data, restMethod)
 
-	return readResourceRestMethod(data, serviceNowClient)
+	return readResourceRestMethod(ctx, data, serviceNowClient)
 }
 
-func updateResourceRestMethod(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointRestMethod, resourceToRestMethod(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceRestMethod(data, serviceNowClient)
+	return readResourceRestMethod(ctx, data, serviceNowClient)
 }
 
-func deleteResourceRestMethod(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceRestMethod(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointRestMethod, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointRestMethod, data.Id()))
 }
 
 func resourceFromRestMethod(data *schema.ResourceData, restMethod *client.RestMethod) {

@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -17,19 +20,20 @@ const dbTableConfigurationAccess = "configuration_access"
 const dbTableExtendable = "extendable"
 const dbTableLiveFeed = "live_feed"
 const dbTableName = "name"
+const dbTableSuperClass = "super_class"
 
 // ResourceDBTable manages a DBTable in ServiceNow.
 func ResourceDBTable() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_db_table` manages a database table within ServiceNow.",
 
-		Create: createResourceDBTable,
-		Read:   readResourceDBTable,
-		Update: updateResourceDBTable,
-		Delete: deleteResourceDBTable,
+		CreateContext: createResourceDBTable,
+		ReadContext:   readResourceDBTable,
+		UpdateContext: updateResourceDBTable,
+		DeleteContext: deleteResourceDBTable,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -106,17 +110,23 @@ func ResourceDBTable() *schema.Resource {
 				Computed:    true,
 				Description: "The internal name of the table.",
 			},
+			dbTableSuperClass: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The sys_id of the parent table this table extends (super class). Leave empty to create a standalone table.",
+			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceDBTable(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	dbTable := &client.DBTable{}
 	if err := snowClient.GetObject(client.EndpointDBTable, data.Id(), dbTable); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromDBTable(data, dbTable)
@@ -124,30 +134,30 @@ func readResourceDBTable(data *schema.ResourceData, serviceNowClient interface{}
 	return nil
 }
 
-func createResourceDBTable(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	dbTable := resourceToDBTable(data)
 	if err := snowClient.CreateObject(client.EndpointDBTable, dbTable); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromDBTable(data, dbTable)
 
-	return readResourceDBTable(data, serviceNowClient)
+	return readResourceDBTable(ctx, data, serviceNowClient)
 }
 
-func updateResourceDBTable(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointDBTable, resourceToDBTable(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceDBTable(data, serviceNowClient)
+	return readResourceDBTable(ctx, data, serviceNowClient)
 }
 
-func deleteResourceDBTable(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceDBTable(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointDBTable, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointDBTable, data.Id()))
 }
 
 func resourceFromDBTable(data *schema.ResourceData, dbTable *client.DBTable) {
@@ -164,6 +174,7 @@ func resourceFromDBTable(data *schema.ResourceData, dbTable *client.DBTable) {
 	data.Set(dbTableExtendable, dbTable.Extendable)
 	data.Set(dbTableLiveFeed, dbTable.LiveFeed)
 	data.Set(dbTableName, dbTable.Name)
+	data.Set(dbTableSuperClass, dbTable.SuperClass)
 	data.Set(commonScope, dbTable.Scope)
 }
 
@@ -183,6 +194,7 @@ func resourceToDBTable(data *schema.ResourceData) *client.DBTable {
 		CreateAccessControls: true,
 		CreateModule:         false,
 		CreateMobileModule:   false,
+		SuperClass:           data.Get(dbTableSuperClass).(string),
 	}
 	dbTable.ID = data.Id()
 	dbTable.Scope = data.Get(commonScope).(string)

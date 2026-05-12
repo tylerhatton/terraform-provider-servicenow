@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -15,19 +18,20 @@ func ResourceContentCSS() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_content_css` manages a style sheet(CSS) configuration within ServiceNow.",
 
-		Create: createResourceContentCSS,
-		Read:   readResourceContentCSS,
-		Update: updateResourceContentCSS,
-		Delete: deleteResourceContentCSS,
+		CreateContext: createResourceContentCSS,
+		ReadContext:   readResourceContentCSS,
+		UpdateContext: updateResourceContentCSS,
+		DeleteContext: deleteResourceContentCSS,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			contentCSSName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Display name of the content management style sheet.",
 			},
 			contentCSSType: {
 				Type:     schema.TypeString,
@@ -56,12 +60,12 @@ func ResourceContentCSS() *schema.Resource {
 	}
 }
 
-func readResourceContentCSS(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	contentCSS := &client.ContentCSS{}
 	if err := snowClient.GetObject(client.EndpointContentCSS, data.Id(), contentCSS); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromContentCSS(data, contentCSS)
@@ -69,30 +73,30 @@ func readResourceContentCSS(data *schema.ResourceData, serviceNowClient interfac
 	return nil
 }
 
-func createResourceContentCSS(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	contentCSS := resourceToContentCSS(data)
 	if err := snowClient.CreateObject(client.EndpointContentCSS, contentCSS); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromContentCSS(data, contentCSS)
 
-	return readResourceContentCSS(data, serviceNowClient)
+	return readResourceContentCSS(ctx, data, serviceNowClient)
 }
 
-func updateResourceContentCSS(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointContentCSS, resourceToContentCSS(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceContentCSS(data, serviceNowClient)
+	return readResourceContentCSS(ctx, data, serviceNowClient)
 }
 
-func deleteResourceContentCSS(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceContentCSS(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointContentCSS, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointContentCSS, data.Id()))
 }
 
 func resourceFromContentCSS(data *schema.ResourceData, contentCSS *client.ContentCSS) {

@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -14,40 +17,43 @@ func ResourceJsIncludeRelation() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_js_include_relation` manages a relation between a js include and a widget dependency within ServiceNow.",
 
-		Create: createResourceJsIncludeRelation,
-		Read:   readResourceJsIncludeRelation,
-		Update: updateResourceJsIncludeRelation,
-		Delete: deleteResourceJsIncludeRelation,
+		CreateContext: createResourceJsIncludeRelation,
+		ReadContext:   readResourceJsIncludeRelation,
+		UpdateContext: updateResourceJsIncludeRelation,
+		DeleteContext: deleteResourceJsIncludeRelation,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			jsIncludeRelationDependencyID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Sys ID of the widget dependency this JS include is associated with.",
 			},
 			jsIncludeRelationJsIncludeID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Sys ID of the JS include to associate with the widget dependency.",
 			},
 			jsIncludeRelationOrder: {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  100,
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     100,
+				Description: "The load order for the JS include within the widget dependency.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceJsIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsIncludeRelation := &client.JsIncludeRelation{}
 	if err := snowClient.GetObject(client.EndpointJsIncludeRelation, data.Id(), jsIncludeRelation); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromJsIncludeRelation(data, jsIncludeRelation)
@@ -55,30 +61,30 @@ func readResourceJsIncludeRelation(data *schema.ResourceData, serviceNowClient i
 	return nil
 }
 
-func createResourceJsIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsIncludeRelation := resourceToJsIncludeRelation(data)
 	if err := snowClient.CreateObject(client.EndpointJsIncludeRelation, jsIncludeRelation); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromJsIncludeRelation(data, jsIncludeRelation)
 
-	return readResourceJsIncludeRelation(data, serviceNowClient)
+	return readResourceJsIncludeRelation(ctx, data, serviceNowClient)
 }
 
-func updateResourceJsIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointJsIncludeRelation, resourceToJsIncludeRelation(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceJsIncludeRelation(data, serviceNowClient)
+	return readResourceJsIncludeRelation(ctx, data, serviceNowClient)
 }
 
-func deleteResourceJsIncludeRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointJsIncludeRelation, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointJsIncludeRelation, data.Id()))
 }
 
 func resourceFromJsIncludeRelation(data *schema.ResourceData, jsIncludeRelation *client.JsIncludeRelation) {

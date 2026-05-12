@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -13,35 +16,37 @@ func ResourceWidgetDependencyRelation() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_widget_dependency_relation` manages a relationship between widget and widget dependency within ServiceNow.",
 
-		Create: createResourceWidgetDepRelation,
-		Read:   readResourceWidgetDepRelation,
-		Update: updateResourceWidgetDepRelation,
-		Delete: deleteResourceWidgetDepRelation,
+		CreateContext: createResourceWidgetDepRelation,
+		ReadContext:   readResourceWidgetDepRelation,
+		UpdateContext: updateResourceWidgetDepRelation,
+		DeleteContext: deleteResourceWidgetDepRelation,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			widgetDepRelationDependencyID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The sys ID of the widget dependency to link.",
 			},
 			widgetDepRelationWidgetID: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The sys ID of the widget to link the dependency to.",
 			},
 			commonScope: getScopeSchema(),
 		},
 	}
 }
 
-func readResourceWidgetDepRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceWidgetDepRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	relation := &client.WidgetDependencyRelation{}
 	if err := snowClient.GetObject(client.EndpointWidgetDependencyRelation, data.Id(), relation); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidgetDepRelation(data, relation)
@@ -49,30 +54,30 @@ func readResourceWidgetDepRelation(data *schema.ResourceData, serviceNowClient i
 	return nil
 }
 
-func createResourceWidgetDepRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceWidgetDepRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	relation := resourceToWidgetDepRelation(data)
 	if err := snowClient.CreateObject(client.EndpointWidgetDependencyRelation, relation); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromWidgetDepRelation(data, relation)
 
-	return readResourceWidgetDepRelation(data, serviceNowClient)
+	return readResourceWidgetDepRelation(ctx, data, serviceNowClient)
 }
 
-func updateResourceWidgetDepRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceWidgetDepRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointWidgetDependencyRelation, resourceToWidgetDepRelation(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceWidgetDepRelation(data, serviceNowClient)
+	return readResourceWidgetDepRelation(ctx, data, serviceNowClient)
 }
 
-func deleteResourceWidgetDepRelation(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceWidgetDepRelation(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointWidgetDependencyRelation, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointWidgetDependencyRelation, data.Id()))
 }
 
 func resourceFromWidgetDepRelation(data *schema.ResourceData, relation *client.WidgetDependencyRelation) {

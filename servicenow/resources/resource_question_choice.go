@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -18,13 +21,13 @@ func ResourceQuestionChoice() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_question_choice` manages a question choice within ServiceNow.",
 
-		Create: createResourceQuestionChoice,
-		Read:   readResourceQuestionChoice,
-		Update: updateResourceQuestionChoice,
-		Delete: deleteResourceQuestionChoice,
+		CreateContext: createResourceQuestionChoice,
+		ReadContext:   readResourceQuestionChoice,
+		UpdateContext: updateResourceQuestionChoice,
+		DeleteContext: deleteResourceQuestionChoice,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -73,12 +76,12 @@ func ResourceQuestionChoice() *schema.Resource {
 	}
 }
 
-func readResourceQuestionChoice(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	questionChoice := &client.QuestionChoice{}
 	if err := snowClient.GetObject(client.EndpointQuestionChoice, data.Id(), questionChoice); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromQuestionChoice(data, questionChoice)
@@ -86,30 +89,30 @@ func readResourceQuestionChoice(data *schema.ResourceData, serviceNowClient inte
 	return nil
 }
 
-func createResourceQuestionChoice(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	questionChoice := resourceToQuestionChoice(data)
 	if err := snowClient.CreateObject(client.EndpointQuestionChoice, questionChoice); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromQuestionChoice(data, questionChoice)
 
-	return readResourceQuestionChoice(data, serviceNowClient)
+	return readResourceQuestionChoice(ctx, data, serviceNowClient)
 }
 
-func updateResourceQuestionChoice(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointQuestionChoice, resourceToQuestionChoice(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceQuestionChoice(data, serviceNowClient)
+	return readResourceQuestionChoice(ctx, data, serviceNowClient)
 }
 
-func deleteResourceQuestionChoice(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointQuestionChoice, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointQuestionChoice, data.Id()))
 }
 
 func resourceFromQuestionChoice(data *schema.ResourceData, questionChoice *client.QuestionChoice) {

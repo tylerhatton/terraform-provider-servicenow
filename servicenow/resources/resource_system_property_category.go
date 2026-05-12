@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -13,13 +16,13 @@ func ResourceSystemPropertyCategory() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_system_property_category` manages a system property category within ServiceNow.",
 
-		Create: createResourceSystemPropertyCategory,
-		Read:   readResourceSystemPropertyCategory,
-		Update: updateResourceSystemPropertyCategory,
-		Delete: deleteResourceSystemPropertyCategory,
+		CreateContext: createResourceSystemPropertyCategory,
+		ReadContext:   readResourceSystemPropertyCategory,
+		UpdateContext: updateResourceSystemPropertyCategory,
+		DeleteContext: deleteResourceSystemPropertyCategory,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -39,12 +42,12 @@ func ResourceSystemPropertyCategory() *schema.Resource {
 	}
 }
 
-func readResourceSystemPropertyCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceSystemPropertyCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyCategory := &client.SystemPropertyCategory{}
 	if err := snowClient.GetObject(client.EndpointSystemPropertyCategory, data.Id(), systemPropertyCategory); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromSystemPropertyCategory(data, systemPropertyCategory)
@@ -52,30 +55,30 @@ func readResourceSystemPropertyCategory(data *schema.ResourceData, serviceNowCli
 	return nil
 }
 
-func createResourceSystemPropertyCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceSystemPropertyCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyCategory := resourceToSystemPropertyCategory(data)
 	if err := snowClient.CreateObject(client.EndpointSystemPropertyCategory, systemPropertyCategory); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromSystemPropertyCategory(data, systemPropertyCategory)
 
-	return readResourceSystemPropertyCategory(data, serviceNowClient)
+	return readResourceSystemPropertyCategory(ctx, data, serviceNowClient)
 }
 
-func updateResourceSystemPropertyCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceSystemPropertyCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointSystemPropertyCategory, resourceToSystemPropertyCategory(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceSystemPropertyCategory(data, serviceNowClient)
+	return readResourceSystemPropertyCategory(ctx, data, serviceNowClient)
 }
 
-func deleteResourceSystemPropertyCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceSystemPropertyCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointSystemPropertyCategory, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointSystemPropertyCategory, data.Id()))
 }
 
 func resourceFromSystemPropertyCategory(data *schema.ResourceData, systemPropertyCategory *client.SystemPropertyCategory) {

@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -17,7 +20,7 @@ func DataSourceApplicationCategory() *schema.Resource {
 			Required: true,
 		},
 		applicationCategoryOrder: {
-			Type:     schema.TypeString,
+			Type:     schema.TypeInt,
 			Computed: true,
 		},
 		applicationCategoryStyle: {
@@ -30,17 +33,17 @@ func DataSourceApplicationCategory() *schema.Resource {
 
 	return &schema.Resource{
 		Description: "`servicenow_application_category` data source can be used to retrieve information of a single application category in ServiceNow by Sys ID",
-		Read:        readResourceApplicationCategory,
+		ReadContext: readResourceApplicationCategory,
 		Schema:      resourceSchema,
 	}
 }
 
-func readResourceApplicationCategory(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceApplicationCategory(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationCategory := &client.ApplicationCategory{}
 	if err := snowClient.GetObjectByName(client.EndpointApplicationCategory, data.Get(applicationCategoryName).(string), applicationCategory); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromApplicationCategory(data, applicationCategory)

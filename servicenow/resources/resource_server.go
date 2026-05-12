@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -32,13 +35,13 @@ func ResourceServer() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_server` manages a server entry within ServiceNow.",
 
-		Create: createResourceServer,
-		Read:   readResourceServer,
-		Update: updateResourceServer,
-		Delete: deleteResourceServer,
+		CreateContext: createResourceServer,
+		ReadContext:   readResourceServer,
+		UpdateContext: updateResourceServer,
+		DeleteContext: deleteResourceServer,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -171,12 +174,12 @@ func ResourceServer() *schema.Resource {
 	}
 }
 
-func readResourceServer(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	server := &client.Server{}
 	if err := snowClient.GetObject(client.EndpointServer, data.Id(), server); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromServer(data, server)
@@ -184,30 +187,30 @@ func readResourceServer(data *schema.ResourceData, serviceNowClient interface{})
 	return nil
 }
 
-func createResourceServer(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	server := resourceToServer(data)
 	if err := snowClient.CreateObject(client.EndpointServer, server); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromServer(data, server)
 
-	return readResourceServer(data, serviceNowClient)
+	return readResourceServer(ctx, data, serviceNowClient)
 }
 
-func updateResourceServer(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointServer, resourceToServer(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceServer(data, serviceNowClient)
+	return readResourceServer(ctx, data, serviceNowClient)
 }
 
-func deleteResourceServer(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceServer(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointServer, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointServer, data.Id()))
 }
 
 func resourceFromServer(data *schema.ResourceData, server *client.Server) {

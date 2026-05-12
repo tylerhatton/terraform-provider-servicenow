@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -13,17 +16,17 @@ func DataSourceRole() *schema.Resource {
 
 	return &schema.Resource{
 		Description: "`servicenow_role` data source can be used to retrieve information of a single role in ServiceNow by Sys ID",
-		Read:        readDataSourceRole,
+		ReadContext: readDataSourceRole,
 		Schema:      resourceSchema,
 	}
 }
 
-func readDataSourceRole(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readDataSourceRole(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := &client.Role{}
 	if err := snowClient.GetObjectByName(client.EndpointRole, data.Get(roleName).(string), role); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromRole(data, role)

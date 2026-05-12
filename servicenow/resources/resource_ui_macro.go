@@ -1,7 +1,10 @@
 package resources
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/tylerhatton/terraform-provider-servicenow/servicenow/client"
 )
 
@@ -16,19 +19,20 @@ func ResourceUIMacro() *schema.Resource {
 	return &schema.Resource{
 		Description: "`servicenow_ui_macro` manages a UI Macro configuration within ServiceNow.",
 
-		Create: createResourceUIMacro,
-		Read:   readResourceUIMacro,
-		Update: updateResourceUIMacro,
-		Delete: deleteResourceUIMacro,
+		CreateContext: createResourceUIMacro,
+		ReadContext:   readResourceUIMacro,
+		UpdateContext: updateResourceUIMacro,
+		DeleteContext: deleteResourceUIMacro,
 
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
 			uiMacroName: {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the UI Macro.",
 			},
 			uiMacroXML: {
 				Type:        schema.TypeString,
@@ -36,9 +40,10 @@ func ResourceUIMacro() *schema.Resource {
 				Description: "The body of the UI Macro. Must be in XML format.",
 			},
 			uiMacroDescription: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "Description of the UI Macro.",
 			},
 			uiMacroAPIName: {
 				Type:        schema.TypeString,
@@ -59,12 +64,12 @@ func ResourceUIMacro() *schema.Resource {
 	}
 }
 
-func readResourceUIMacro(data *schema.ResourceData, serviceNowClient interface{}) error {
+func readResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiMacro := &client.UIMacro{}
 	if err := snowClient.GetObject(client.EndpointUIMacro, data.Id(), uiMacro); err != nil {
 		data.SetId("")
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIMacro(data, uiMacro)
@@ -72,30 +77,30 @@ func readResourceUIMacro(data *schema.ResourceData, serviceNowClient interface{}
 	return nil
 }
 
-func createResourceUIMacro(data *schema.ResourceData, serviceNowClient interface{}) error {
+func createResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiMacro := resourceToUIMacro(data)
 	if err := snowClient.CreateObject(client.EndpointUIMacro, uiMacro); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceFromUIMacro(data, uiMacro)
 
-	return readResourceUIMacro(data, serviceNowClient)
+	return readResourceUIMacro(ctx, data, serviceNowClient)
 }
 
-func updateResourceUIMacro(data *schema.ResourceData, serviceNowClient interface{}) error {
+func updateResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	if err := snowClient.UpdateObject(client.EndpointUIMacro, resourceToUIMacro(data)); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
-	return readResourceUIMacro(data, serviceNowClient)
+	return readResourceUIMacro(ctx, data, serviceNowClient)
 }
 
-func deleteResourceUIMacro(data *schema.ResourceData, serviceNowClient interface{}) error {
+func deleteResourceUIMacro(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
-	return snowClient.DeleteObject(client.EndpointUIMacro, data.Id())
+	return diag.FromErr(snowClient.DeleteObject(client.EndpointUIMacro, data.Id()))
 }
 
 func resourceFromUIMacro(data *schema.ResourceData, uiMacro *client.UIMacro) {
