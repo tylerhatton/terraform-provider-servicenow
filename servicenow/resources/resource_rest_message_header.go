@@ -51,6 +51,10 @@ func readResourceRestMessageHeader(ctx context.Context, data *schema.ResourceDat
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMessageHeader := &client.RestMessageHeader{}
 	if err := snowClient.GetObject(client.EndpointRestMessageHeader, data.Id(), restMessageHeader); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

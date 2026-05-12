@@ -64,6 +64,10 @@ func readResourceContentCSS(ctx context.Context, data *schema.ResourceData, serv
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	contentCSS := &client.ContentCSS{}
 	if err := snowClient.GetObject(client.EndpointContentCSS, data.Id(), contentCSS); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

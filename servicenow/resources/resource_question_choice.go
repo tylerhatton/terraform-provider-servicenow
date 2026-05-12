@@ -56,13 +56,13 @@ func ResourceQuestionChoice() *schema.Resource {
 			questionChoicePrice: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "0",
+				Computed:    true,
 				Description: "The price associated with question choice.",
 			},
 			questionChoiceRecurringPrice: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "0",
+				Computed:    true,
 				Description: "The recurring price associated with question choice.",
 			},
 			questionChoiceInactive: {
@@ -80,6 +80,10 @@ func readResourceQuestionChoice(ctx context.Context, data *schema.ResourceData, 
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	questionChoice := &client.QuestionChoice{}
 	if err := snowClient.GetObject(client.EndpointQuestionChoice, data.Id(), questionChoice); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

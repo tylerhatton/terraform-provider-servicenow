@@ -206,6 +206,10 @@ func readResourceServiceCatalogVariable(ctx context.Context, data *schema.Resour
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalogVariable := &client.ServiceCatalogVariable{}
 	if err := snowClient.GetObject(client.EndpointServiceCatalogVariable, data.Id(), serviceCatalogVariable); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

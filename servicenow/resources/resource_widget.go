@@ -136,6 +136,10 @@ func readResourceWidget(ctx context.Context, data *schema.ResourceData, serviceN
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	widget := &client.Widget{}
 	if err := snowClient.GetObject(client.EndpointWidget, data.Id(), widget); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

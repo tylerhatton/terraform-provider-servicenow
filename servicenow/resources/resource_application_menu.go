@@ -93,6 +93,10 @@ func readResourceApplicationMenu(ctx context.Context, data *schema.ResourceData,
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	applicationMenu := &client.ApplicationMenu{}
 	if err := snowClient.GetObject(client.EndpointApplicationMenu, data.Id(), applicationMenu); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

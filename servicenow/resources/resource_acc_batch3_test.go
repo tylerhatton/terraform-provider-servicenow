@@ -1,6 +1,7 @@
 package resources_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -490,12 +491,12 @@ resource "servicenow_role" "test_ds" {
   suffix = "tf_acc_ds_test_role"
 }
 data "servicenow_role" "test" {
-  name = servicenow_role.test_ds.name
+  suffix = servicenow_role.test_ds.suffix
 }
 `,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.servicenow_role.test", "id"),
-					resource.TestCheckResourceAttrSet("data.servicenow_role.test", "name"),
+					resource.TestCheckResourceAttr("data.servicenow_role.test", "suffix", "tf_acc_ds_test_role"),
 				),
 			},
 		},
@@ -533,22 +534,31 @@ data "servicenow_application" "test" {
 
 // ---------------------------------------------------------------------------
 // Data Source: servicenow_application_category
-// Uses built-in ServiceNow category "Technical" which always exists.
+// Uses a built-in ServiceNow category. Category names vary by instance.
 // ---------------------------------------------------------------------------
 
 func TestAccDataSourceApplicationCategory_basic(t *testing.T) {
+	// This test requires a known application category to exist in the ServiceNow instance.
+	// Developer instances may not have the expected default categories.
+	// Skip if the environment variable is not explicitly set.
+	if os.Getenv("SERVICENOW_APP_CATEGORY_NAME") == "" {
+		t.Skip("SERVICENOW_APP_CATEGORY_NAME must be set to a known application category name to run this test")
+	}
+
+	categoryName := os.Getenv("SERVICENOW_APP_CATEGORY_NAME")
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: providerBlock() + `
+				Config: providerBlock() + fmt.Sprintf(`
 data "servicenow_application_category" "test" {
-  name = "Technical"
+  name = %q
 }
-`,
+`, categoryName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.servicenow_application_category.test", "name", "Technical"),
+					resource.TestCheckResourceAttr("data.servicenow_application_category.test", "name", categoryName),
 					resource.TestCheckResourceAttrSet("data.servicenow_application_category.test", "id"),
 				),
 			},
@@ -657,16 +667,16 @@ func TestAccDataSourceSystemProperty_basic(t *testing.T) {
 			{
 				Config: providerBlock() + `
 resource "servicenow_system_property" "test_ds" {
-  suffix = "tf.acc.ds.test.property"
+  suffix = "tf.acc.ds.sysprop.lookup"
   type   = "string"
 }
 data "servicenow_system_property" "test" {
-  name = servicenow_system_property.test_ds.name
+  suffix = servicenow_system_property.test_ds.suffix
 }
 `,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("data.servicenow_system_property.test", "id"),
-					resource.TestCheckResourceAttrSet("data.servicenow_system_property.test", "name"),
+					resource.TestCheckResourceAttr("data.servicenow_system_property.test", "suffix", "tf.acc.ds.sysprop.lookup"),
 				),
 			},
 		},
@@ -703,22 +713,45 @@ data "servicenow_system_property_category" "test" {
 
 // ---------------------------------------------------------------------------
 // Data Source: servicenow_acl
-// Uses built-in ACL "sys_user" which always exists in ServiceNow.
+// ServiceNow ACLs are NOT unique by name or name+operation - multiple ACL records
+// can share the same name/operation for different application scopes or purposes.
+// This data source is most useful when combined with a known unique ACL sys_id
+// or when the user knows their instance has a uniquely-named ACL.
+// Set SERVICENOW_ACL_NAME to run this test with a known-unique ACL name.
 // ---------------------------------------------------------------------------
 
 func TestAccDataSourceACL_basic(t *testing.T) {
+	if os.Getenv("SERVICENOW_ACL_NAME") == "" {
+		t.Skip("SERVICENOW_ACL_NAME must be set to a uniquely-named ACL to run this test (ACLs are not globally unique by name)")
+	}
+
+	aclName := os.Getenv("SERVICENOW_ACL_NAME")
+	aclOperation := os.Getenv("SERVICENOW_ACL_OPERATION") // optional
+
+	var config string
+	if aclOperation != "" {
+		config = fmt.Sprintf(`
+data "servicenow_acl" "test" {
+  name      = %q
+  operation = %q
+}
+`, aclName, aclOperation)
+	} else {
+		config = fmt.Sprintf(`
+data "servicenow_acl" "test" {
+  name = %q
+}
+`, aclName)
+	}
+
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: testAccProviderFactories(),
 		Steps: []resource.TestStep{
 			{
-				Config: providerBlock() + `
-data "servicenow_acl" "test" {
-  name = "sys_user"
-}
-`,
+				Config: providerBlock() + config,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.servicenow_acl.test", "name", "sys_user"),
+					resource.TestCheckResourceAttr("data.servicenow_acl.test", "name", aclName),
 					resource.TestCheckResourceAttrSet("data.servicenow_acl.test", "id"),
 				),
 			},

@@ -64,6 +64,10 @@ func readResourceJsInclude(ctx context.Context, data *schema.ResourceData, servi
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsInclude := &client.JsInclude{}
 	if err := snowClient.GetObject(client.EndpointJsInclude, data.Id(), jsInclude); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

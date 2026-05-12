@@ -91,6 +91,10 @@ func readResourceOAuthEntity(ctx context.Context, data *schema.ResourceData, ser
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	oauthEntity := &client.OAuthEntity{}
 	if err := snowClient.GetObject(client.EndpointOAuthEntity, data.Id(), oauthEntity); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

@@ -97,6 +97,10 @@ func readResourceAlias(ctx context.Context, data *schema.ResourceData, serviceNo
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	alias := &client.Alias{}
 	if err := snowClient.GetObject(client.EndpointAlias, data.Id(), alias); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

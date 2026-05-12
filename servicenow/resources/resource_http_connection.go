@@ -92,6 +92,10 @@ func readResourceHttpConnection(ctx context.Context, data *schema.ResourceData, 
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	httpConnection := &client.HttpConnection{}
 	if err := snowClient.GetObject(client.EndpointHttpConnection, data.Id(), httpConnection); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

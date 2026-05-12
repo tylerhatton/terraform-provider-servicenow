@@ -68,6 +68,10 @@ func readResourceUIMacro(ctx context.Context, data *schema.ResourceData, service
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiMacro := &client.UIMacro{}
 	if err := snowClient.GetObject(client.EndpointUIMacro, data.Id(), uiMacro); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

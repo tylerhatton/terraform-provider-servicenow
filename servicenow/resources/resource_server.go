@@ -178,6 +178,10 @@ func readResourceServer(ctx context.Context, data *schema.ResourceData, serviceN
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	server := &client.Server{}
 	if err := snowClient.GetObject(client.EndpointServer, data.Id(), server); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

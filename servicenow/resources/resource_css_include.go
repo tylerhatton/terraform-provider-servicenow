@@ -64,6 +64,10 @@ func readResourceCSSInclude(ctx context.Context, data *schema.ResourceData, serv
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	cssInclude := &client.CSSInclude{}
 	if err := snowClient.GetObject(client.EndpointCSSInclude, data.Id(), cssInclude); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

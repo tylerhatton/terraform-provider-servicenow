@@ -60,7 +60,7 @@ func ResourceServiceCatalog() *schema.Resource {
 			serviceCatalogBackgroundColor: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "#FFFFFF",
+				Computed:    true,
 				Description: "Background color of service catalog in hexidecimal format.",
 			},
 			serviceCatalogDesktopImage: {
@@ -102,6 +102,10 @@ func readResourceServiceCatalog(ctx context.Context, data *schema.ResourceData, 
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	serviceCatalog := &client.ServiceCatalog{}
 	if err := snowClient.GetObject(client.EndpointServiceCatalog, data.Id(), serviceCatalog); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

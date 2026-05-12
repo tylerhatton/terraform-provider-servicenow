@@ -67,6 +67,10 @@ func readResourceRole(ctx context.Context, data *schema.ResourceData, serviceNow
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	role := &client.Role{}
 	if err := snowClient.GetObject(client.EndpointRole, data.Id(), role); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

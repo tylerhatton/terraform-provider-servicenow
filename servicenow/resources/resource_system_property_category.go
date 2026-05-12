@@ -46,6 +46,10 @@ func readResourceSystemPropertyCategory(ctx context.Context, data *schema.Resour
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemPropertyCategory := &client.SystemPropertyCategory{}
 	if err := snowClient.GetObject(client.EndpointSystemPropertyCategory, data.Id(), systemPropertyCategory); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

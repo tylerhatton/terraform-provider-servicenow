@@ -66,6 +66,10 @@ func readResourceBasicAuthCredential(ctx context.Context, data *schema.ResourceD
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	basicAuthCredential := &client.BasicAuthCredential{}
 	if err := snowClient.GetObject(client.EndpointBasicAuthCredential, data.Id(), basicAuthCredential); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}
@@ -106,7 +110,9 @@ func resourceFromBasicAuthCredential(data *schema.ResourceData, basicAuthCredent
 	data.Set(basicAuthCredentialName, basicAuthCredential.Name)
 	data.Set(basicAuthCredentialOrder, basicAuthCredential.Order)
 	data.Set(basicAuthCredentialUserName, basicAuthCredential.UserName)
-	data.Set(basicAuthCredentialPassword, basicAuthCredential.Password)
+	// ServiceNow returns the password in an encrypted form that differs from the
+	// plaintext provided by the user. Never overwrite the user-provided password
+	// in state with the server-side encrypted value to avoid perpetual drift.
 	data.Set(basicAuthCredentialCredentialAlias, basicAuthCredential.CredentialAlias)
 }
 

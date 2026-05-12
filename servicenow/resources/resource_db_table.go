@@ -125,6 +125,10 @@ func readResourceDBTable(ctx context.Context, data *schema.ResourceData, service
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	dbTable := &client.DBTable{}
 	if err := snowClient.GetObject(client.EndpointDBTable, data.Id(), dbTable); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

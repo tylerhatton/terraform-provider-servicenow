@@ -21,6 +21,7 @@ type ServiceNowClient interface {
 	GetObject(string, string, Record) error
 	GetObjectByName(string, string, Record) error
 	GetObjectByTitle(string, string, Record) error
+	GetObjectByQuery(string, string, Record) error
 	CreateObject(string, Record) error
 	UpdateObject(string, Record) error
 	DeleteObject(string, string) error
@@ -123,6 +124,15 @@ func (client *Client) GetObjectByTitle(endpoint string, title string, responseOb
 	return parseResponseToRecord(jsonResponse, responseObjectOut)
 }
 
+// GetObjectByQuery retrieves an object via a raw encoded query string (e.g. "name=sys_user^operation=read").
+func (client *Client) GetObjectByQuery(endpoint string, query string, responseObjectOut Record) error {
+	jsonResponse, err := client.requestJSON("GET", endpoint+"?JSONv2&sysparm_query="+url.QueryEscape(query), nil)
+	if err != nil {
+		return err
+	}
+	return parseResponseToRecord(jsonResponse, responseObjectOut)
+}
+
 // CreateObject creates a new object in ServiceNow, validates the response and fills the object
 // with properties received from the service.
 func (client *Client) CreateObject(endpoint string, objectToCreate Record) error {
@@ -163,7 +173,7 @@ func (client *Client) requestJSON(method string, path string, jsonData interface
 		data = bytes.NewBuffer(nil)
 	}
 
-	request, _ := http.NewRequest(method, client.BaseURL+path, data)
+	request, _ := http.NewRequest(method, client.BaseURL+"/"+path, data)
 
 	// Add the needed headers.
 	request.Header.Set("Authorization", client.Auth)
@@ -210,4 +220,9 @@ func checkStatus(record Record) error {
 		return fmt.Errorf("error from ServiceNow -> %s: %s", record.GetError().Message, record.GetError().Reason)
 	}
 	return nil
+}
+
+// IsNotFound returns true if the error indicates a record was not found in ServiceNow.
+func IsNotFound(err error) bool {
+	return err != nil && err.Error() == "no records found"
 }

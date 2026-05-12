@@ -33,7 +33,8 @@ func DataSourceACL() *schema.Resource {
 		},
 		aclOperation: {
 			Type:        schema.TypeString,
-			Description: "Select the operation this ACL rule secures.",
+			Description: "Select the operation this ACL rule secures. Used as an additional filter when multiple ACLs share the same name (e.g. 'read', 'write', 'delete', 'create').",
+			Optional:    true,
 			Computed:    true,
 		},
 		aclAdminOverrides: {
@@ -72,8 +73,13 @@ func DataSourceACL() *schema.Resource {
 
 	setOnlyRequiredSchema(resourceSchema, aclName)
 
+	// After setOnlyRequiredSchema forces everything to Computed, restore operation and type
+	// as Optional+Computed so users can provide them to disambiguate ACLs with the same name.
+	resourceSchema[aclOperation].Optional = true
+	resourceSchema[aclType].Optional = true
+
 	return &schema.Resource{
-		Description: "`servicenow_acl` data source can be used to retrieve information of a single ACL in ServiceNow by Sys ID",
+		Description: "`servicenow_acl` data source can be used to retrieve information of a single ACL in ServiceNow. Use operation and type to disambiguate when multiple ACLs share the same name.",
 		ReadContext: readDataSourceACL,
 		Schema:      resourceSchema,
 	}
@@ -82,7 +88,25 @@ func DataSourceACL() *schema.Resource {
 func readDataSourceACL(ctx context.Context, data *schema.ResourceData, serviceNowClient interface{}) diag.Diagnostics {
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	acl := &client.ACL{}
-	if err := snowClient.GetObjectByName(client.EndpointACL, data.Get(aclName).(string), acl); err != nil {
+	name := data.Get(aclName).(string)
+	operation := data.Get(aclOperation).(string)
+	aclTypeVal := data.Get(aclType).(string)
+
+	var err error
+	if operation != "" || aclTypeVal != "" {
+		// Build compound query to uniquely identify the ACL.
+		query := "name=" + name
+		if operation != "" {
+			query += "^operation=" + operation
+		}
+		if aclTypeVal != "" {
+			query += "^type=" + aclTypeVal
+		}
+		err = snowClient.GetObjectByQuery(client.EndpointACL, query, acl)
+	} else {
+		err = snowClient.GetObjectByName(client.EndpointACL, name, acl)
+	}
+	if err != nil {
 		data.SetId("")
 		return diag.FromErr(err)
 	}

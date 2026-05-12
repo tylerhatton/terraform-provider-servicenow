@@ -33,6 +33,11 @@ func (m *ClientMock) GetObjectByTitle(endpoint string, title string, responseObj
 	return args.Error(0)
 }
 
+func (m *ClientMock) GetObjectByQuery(endpoint string, query string, responseObjectOut client.Record) error {
+	args := m.Called(endpoint, query, responseObjectOut)
+	return args.Error(0)
+}
+
 func (m *ClientMock) CreateObject(endpoint string, record client.Record) error {
 	args := m.Called(endpoint, record)
 	return args.Error(0)
@@ -200,25 +205,47 @@ func TestResourceRestMessageHandleReadError(t *testing.T) {
 func TestDataSourcesCanRead(t *testing.T) {
 	for _, res := range dataSourcesToTest {
 		_, hasName := res.Schema["name"]
+		nameIsRequired := hasName && res.Schema["name"].Required
 		_, hasTitle := res.Schema["title"]
+		titleIsRequired := hasTitle && res.Schema["title"].Required
+		_, hasSuffix := res.Schema["suffix"]
+		suffixIsRequired := hasSuffix && res.Schema["suffix"].Required
 
 		var data *schema.ResourceData
 		clientMock := new(ClientMock)
 
-		if hasTitle && !hasName {
+		if titleIsRequired {
 			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 				"title": "oi",
 			})
 			clientMock.
 				On("GetObjectByTitle", mock.AnythingOfType("string"), "oi", mock.Anything).
 				Return(nil)
-		} else {
+		} else if suffixIsRequired {
+			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"suffix": "oi",
+			})
+			clientMock.
+				On("GetObjectByQuery", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.Anything).
+				Return(nil)
+		} else if nameIsRequired {
 			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
 				"name": "oi",
 			})
 			clientMock.
 				On("GetObjectByName", mock.AnythingOfType("string"), "oi", mock.Anything).
 				Return(nil)
+		} else {
+			// Fallback: try name
+			data = schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+				"name": "oi",
+			})
+			clientMock.
+				On("GetObjectByName", mock.AnythingOfType("string"), "oi", mock.Anything).
+				Return(nil).Maybe()
+			clientMock.
+				On("GetObjectByQuery", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.Anything).
+				Return(nil).Maybe()
 		}
 
 		callRead(res, data, clientMock)

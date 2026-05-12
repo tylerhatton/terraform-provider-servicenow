@@ -76,6 +76,10 @@ func readResourceUIScript(ctx context.Context, data *schema.ResourceData, servic
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiScript := &client.UIScript{}
 	if err := snowClient.GetObject(client.EndpointUIScript, data.Id(), uiScript); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}
@@ -129,6 +133,7 @@ func resourceFromUIScript(data *schema.ResourceData, script *client.UIScript) {
 	data.Set(uiScriptActive, script.Active)
 	data.Set(uiScriptUIType, typeString)
 	data.Set(uiScriptAPIName, script.APIName)
+	data.Set(commonScope, script.Scope)
 }
 
 func resourceToUIScript(data *schema.ResourceData) *client.UIScript {

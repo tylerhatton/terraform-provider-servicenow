@@ -69,6 +69,10 @@ func readResourceRestMethod(ctx context.Context, data *schema.ResourceData, serv
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	restMethod := &client.RestMethod{}
 	if err := snowClient.GetObject(client.EndpointRestMethod, data.Id(), restMethod); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

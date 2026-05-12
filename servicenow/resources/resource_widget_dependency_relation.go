@@ -45,6 +45,10 @@ func readResourceWidgetDepRelation(ctx context.Context, data *schema.ResourceDat
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	relation := &client.WidgetDependencyRelation{}
 	if err := snowClient.GetObject(client.EndpointWidgetDependencyRelation, data.Id(), relation); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

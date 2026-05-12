@@ -52,6 +52,10 @@ func readResourceApplication(ctx context.Context, data *schema.ResourceData, ser
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	application := &client.Application{}
 	if err := snowClient.GetObject(client.EndpointApplication, data.Id(), application); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

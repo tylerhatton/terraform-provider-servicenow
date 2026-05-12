@@ -52,6 +52,10 @@ func readResourceJsIncludeRelation(ctx context.Context, data *schema.ResourceDat
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	jsIncludeRelation := &client.JsIncludeRelation{}
 	if err := snowClient.GetObject(client.EndpointJsIncludeRelation, data.Id(), jsIncludeRelation); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

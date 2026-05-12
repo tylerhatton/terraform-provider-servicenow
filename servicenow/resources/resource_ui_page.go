@@ -85,6 +85,10 @@ func readResourceUIPage(ctx context.Context, data *schema.ResourceData, serviceN
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	uiPage := &client.UIPage{}
 	if err := snowClient.GetObject(client.EndpointUIPage, data.Id(), uiPage); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

@@ -111,6 +111,10 @@ func readResourceSystemProperty(ctx context.Context, data *schema.ResourceData, 
 	snowClient := serviceNowClient.(client.ServiceNowClient)
 	systemProperty := &client.SystemProperty{}
 	if err := snowClient.GetObject(client.EndpointSystemProperty, data.Id(), systemProperty); err != nil {
+		if client.IsNotFound(err) {
+			data.SetId("")
+			return nil
+		}
 		data.SetId("")
 		return diag.FromErr(err)
 	}

@@ -13,7 +13,7 @@ func getProtectionPolicySchema() *schema.Schema {
 	return &schema.Schema{
 		Type:        schema.TypeString,
 		Optional:    true,
-		Default:     "read",
+		Computed:    true,
 		Description: "Determines how application files are protected when downloaded or installed. Can be empty for no protection, 'read' for read-only protection or 'protected'.",
 	}
 }

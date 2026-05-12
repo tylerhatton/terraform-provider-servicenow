@@ -10,7 +10,7 @@ type Alias struct {
 	ParentAlias           string `json:"parent"`
 	Type                  string `json:"type"`
 	ConnectionType        string `json:"connection_type"`
-	MultipleActions       bool   `json:"multiple_actions,string"`
+	MultipleActions       bool   `json:"multiple_connections,string"`
 	RetryPolicy           string `json:"retry_policy"`
 	ConfigurationTemplate string `json:"configuration_template"`
 }
