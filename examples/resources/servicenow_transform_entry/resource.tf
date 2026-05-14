@@ -10,5 +10,4 @@ resource "servicenow_transform_entry" "user_name" {
   source_field = "u_email"
   target_field = "user_name"
   coalesce     = true
-  order        = 100
 }

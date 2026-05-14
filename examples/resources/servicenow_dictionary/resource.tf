@@ -1,6 +1,6 @@
 # Manages a column definition (sys_dictionary entry) for a table in ServiceNow.
 resource "servicenow_db_table" "example" {
-  label     = "Example Table"
+  label     = "Example Dictionary Table"
   user_role = ""
 }
 

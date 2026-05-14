@@ -1,6 +1,6 @@
 # Manages a choice list value (sys_choice entry) for a column on a ServiceNow table.
 resource "servicenow_db_table" "example" {
-  label     = "Example Table"
+  label     = "Example Choice Table"
   user_role = ""
 }
 

@@ -5,8 +5,7 @@ resource "servicenow_transform_map" "example" {
   target_table             = "sys_user"
   active                   = true
   run_business_rules       = true
-  enforce_mandatory_fields = "no"
+  enforce_mandatory_fields = "No"
   copy_empty_fields        = false
   order                    = 100
-  description              = "Imports staged user rows into sys_user."
 }
