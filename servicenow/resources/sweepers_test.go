@@ -429,4 +429,13 @@ func init() {
 			return sweepByNamePrefix("sys_encryption_context.do", "tf-acc-")
 		},
 	})
+
+	// servicenow_record acceptance tests insert into `incident` with a tf-acc-
+	// short_description. Sweep any orphans from prior runs.
+	resource.AddTestSweepers("servicenow_record_incident", &resource.Sweeper{
+		Name: "servicenow_record_incident",
+		F: func(region string) error {
+			return sweepByFieldPrefix("incident.do", "short_description", "tf-acc-")
+		},
+	})
 }

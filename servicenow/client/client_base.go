@@ -39,6 +39,14 @@ type ServiceNowClient interface {
 	CreateObject(ctx context.Context, endpoint string, record Record) error
 	UpdateObject(ctx context.Context, endpoint string, record Record) error
 	DeleteObject(ctx context.Context, endpoint string, id string) error
+
+	// Generic untyped record operations used by servicenow_record. The endpoint
+	// is a bare table name (e.g. "incident") — these methods append ".do" and
+	// JSONv2 query parameters internally.
+	CreateRecord(ctx context.Context, table, scope string, fields map[string]string) (map[string]string, error)
+	GetRecord(ctx context.Context, table, sysID string) (map[string]string, error)
+	GetRecordByQuery(ctx context.Context, table, query string) (map[string]string, error)
+	UpdateRecord(ctx context.Context, table, sysID string, fields map[string]string) (map[string]string, error)
 }
 
 // BaseResult is representing the default properties of all results.

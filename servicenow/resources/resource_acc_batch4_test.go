@@ -1,10 +1,12 @@
 package resources_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 // ---------------------------------------------------------------------------
@@ -1025,4 +1027,153 @@ resource "servicenow_encryption_context" "test" {
 			},
 		},
 	})
+}
+
+// ---------------------------------------------------------------------------
+// Resource: servicenow_record  (generic row CRUD against any table)
+// ---------------------------------------------------------------------------
+
+func TestAccRecord_builtinTable_incident(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: providerBlock() + `
+resource "servicenow_record" "incident" {
+  table = "incident"
+  fields = {
+    short_description = "tf-acc-record-basic"
+    urgency           = "2"
+    impact            = "2"
+  }
+}
+`,
+				Check: resource.ComposeTestCheckFunc(
+					checkExists("servicenow_record.incident"),
+					resource.TestCheckResourceAttr("servicenow_record.incident", "fields.short_description", "tf-acc-record-basic"),
+					resource.TestCheckResourceAttr("servicenow_record.incident", "fields.urgency", "2"),
+					resource.TestCheckResourceAttrSet("servicenow_record.incident", "output.number"),
+					resource.TestCheckResourceAttrSet("servicenow_record.incident", "output.sys_created_on"),
+				),
+			},
+			{
+				Config: providerBlock() + `
+resource "servicenow_record" "incident" {
+  table = "incident"
+  fields = {
+    short_description = "tf-acc-record-basic"
+    urgency           = "3"
+    impact            = "2"
+  }
+}
+`,
+				Check: resource.TestCheckResourceAttr("servicenow_record.incident", "fields.urgency", "3"),
+			},
+			{
+				Config: providerBlock() + `
+resource "servicenow_record" "incident" {
+  table = "incident"
+  fields = {
+    short_description = "tf-acc-record-basic"
+    urgency           = "3"
+    impact            = "2"
+  }
+}
+`,
+				PlanOnly: true,
+			},
+		},
+	})
+}
+
+func TestAccRecord_import(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: providerBlock() + `
+resource "servicenow_record" "to_import" {
+  table = "incident"
+  fields = {
+    short_description = "tf-acc-record-import"
+  }
+}
+`,
+			},
+			{
+				ResourceName:      "servicenow_record.to_import",
+				ImportState:       true,
+				ImportStateIdFunc: importIDForTablePrefix("incident", "servicenow_record.to_import"),
+				// On import, every column moves from `fields` to `output` because
+				// the user hasn't claimed any columns yet — see resource_record.go
+				// importer docs. So both maps legitimately differ from the
+				// pre-import state.
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"fields", "output", "scope"},
+			},
+		},
+	})
+}
+
+func TestAccDataSourceRecord_bySysID(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: providerBlock() + `
+resource "servicenow_record" "src" {
+  table = "incident"
+  fields = {
+    short_description = "tf-acc-record-ds-bysysid"
+  }
+}
+
+data "servicenow_record" "lookup" {
+  table  = "incident"
+  sys_id = servicenow_record.src.id
+}
+`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrPair("data.servicenow_record.lookup", "id", "servicenow_record.src", "id"),
+					resource.TestCheckResourceAttr("data.servicenow_record.lookup", "output.short_description", "tf-acc-record-ds-bysysid"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccDataSourceRecord_byQuery(t *testing.T) {
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: testAccProviderFactories(),
+		Steps: []resource.TestStep{
+			{
+				Config: providerBlock() + `
+data "servicenow_record" "admin_role" {
+  table = "sys_user_role"
+  query = "name=admin"
+}
+`,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.servicenow_record.admin_role", "id"),
+					resource.TestCheckResourceAttr("data.servicenow_record.admin_role", "output.name", "admin"),
+				),
+			},
+		},
+	})
+}
+
+// importIDForTablePrefix builds an ImportStateIdFunc that emits
+// "<table>/<sys_id>" pulled from the prior step's state.
+func importIDForTablePrefix(table, resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("resource %q not in state", resourceName)
+		}
+		return table + "/" + rs.Primary.ID, nil
+	}
 }
